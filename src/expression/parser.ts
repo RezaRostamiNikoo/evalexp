@@ -8,7 +8,7 @@
 
 import { isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode } from "../utils/is";
 import { hasOwnProperty } from "../utils/object";
-import { DELIMITERS, NAMED_DELIMITERS, TOKENTYPE } from "./constants"
+import { CONSTANTS, DELIMITERS, NAMED_DELIMITERS, NUMERIC_CONSTANTS, TOKENTYPE } from "./constants"
 
 type State = {
     extraNodes: Object; // current extra nodes, must be careful not to mutate
@@ -1084,7 +1084,7 @@ export class Parser {
             params = [node]
 
             node = new OperatorNode(name, fn, params)
-            node = this.parseAccessors(state, node)
+            node = this.parseAccessors(node)
         }
 
         return node
@@ -1144,7 +1144,7 @@ export class Parser {
                 }
 
                 if (!this.isToken(')')) {
-                    throw createSyntaxError('Parenthesis ) expected')
+                    throw this.createSyntaxError('Parenthesis ) expected')
                 }
                 this.closeParams()
                 this.getToken()
@@ -1155,7 +1155,7 @@ export class Parser {
             return new CustomNode(params)
         }
 
-        return parseSymbol()
+        return this.parseSymbol()
     }
 
     /**
@@ -1173,19 +1173,22 @@ export class Parser {
             this.getToken()
 
             if (hasOwnProperty(CONSTANTS, name)) { // true, false, null, ...
-                node = new ConstantNode(CONSTANTS[name])
+                console.log("node = new ConstantNode(CONSTANTS[name])", CONSTANTS, name);
+                // node = new ConstantNode(CONSTANTS[name])
             } else if (NUMERIC_CONSTANTS.indexOf(name) !== -1) { // NaN, Infinity
-                node = new ConstantNode(numeric(name, 'number'))
+                console.log("node = new ConstantNode(numeric(name, 'number'))", NUMERIC_CONSTANTS, name);
+                // node = new ConstantNode(numeric(name, 'number'))
             } else {
-                node = new SymbolNode(name)
+                console.log("node = new SymbolNode(name)", name);
+                // node = new SymbolNode(name)
             }
 
             // parse function parameters and matrix index
-            node = this.parseAccessors(state, node)
+            node = this.parseAccessors(node)
             return node
         }
 
-        return parseDoubleQuotesString()
+        return this.parseDoubleQuotesString()
     }
 
     /**
@@ -1202,31 +1205,31 @@ export class Parser {
      * @return {Node} node
      * @private
      */
-    parseAccessors(state, node, types) {
+    parseAccessors(node, types) {
         let params
 
         while ((this.state.token === '(' || this.state.token === '[' || this.state.token === '.') &&
             (!types || types.indexOf(this.state.token) !== -1)) { // eslint-disable-line no-unmodified-loop-condition
             params = []
 
-            if (this.state.token === '(') {
+            if (this.isToken('(')) {
                 if (isSymbolNode(node) || isAccessorNode(node)) {
                     // function invocation likethis.fn(2, 3) or obj.fn(2, 3)
                     this.openParams()
                     this.getToken()
 
-                    if (this.state.token !== ')') {
+                    if (!this.isToken(')')) {
                         params.push(this.parseAssignment())
 
                         // parse a list with parameters
-                        while (this.state.token === ',') { // eslint-disable-line no-unmodified-loop-condition
+                        while (this.isToken(',')) { // eslint-disable-line no-unmodified-loop-condition
                             this.getToken()
                             params.push(this.parseAssignment())
                         }
                     }
 
-                    if (this.state.token !== ')') {
-                        throw createSyntaxError('Parenthesis ) expected')
+                    if (!this.isToken(')')) {
+                        throw this.createSyntaxError('Parenthesis ) expected')
                     }
                     this.closeParams()
                     this.getToken()
@@ -1243,17 +1246,17 @@ export class Parser {
                 this.openParams()
                 this.getToken()
 
-                if (this.state.token !== ']') {
+                if (!this.isToken(']')) {
                     params.push(this.parseAssignment())
 
                     // parse a list with parameters
-                    while (this.state.token === ',') { // eslint-disable-line no-unmodified-loop-condition
+                    while (this.isToken(',')) { // eslint-disable-line no-unmodified-loop-condition
                         this.getToken()
                         params.push(this.parseAssignment())
                     }
                 }
 
-                if (this.state.token !== ']') {
+                if (!this.isToken(']')) {
                     throw createSyntaxError('Parenthesis ] expected')
                 }
                 this.closeParams()
@@ -1293,7 +1296,7 @@ export class Parser {
             node = new ConstantNode(str)
 
             // parse index parameters
-            node = this.parseAccessors(state, node)
+            node = this.parseAccessors(node)
 
             return node
         }
@@ -1344,7 +1347,7 @@ export class Parser {
             node = new ConstantNode(str)
 
             // parse index parameters
-            node = this.parseAccessors(state, node)
+            node = this.parseAccessors(node)
 
             return node
         }
@@ -1443,7 +1446,7 @@ export class Parser {
                 array = new ArrayNode([])
             }
 
-            return this.parseAccessors(state, array)
+            return this.parseAccessors(array)
         }
 
         return this.parseObject()
@@ -1516,7 +1519,7 @@ export class Parser {
             let node = new ObjectNode(properties)
 
             // parse index parameters
-            node = this.parseAccessors(state, node)
+            node = this.parseAccessors(node)
 
             return node
         }
@@ -1566,7 +1569,7 @@ export class Parser {
             this.getToken()
 
             node = new ParenthesisNode(node)
-            node = this.parseAccessors(state, node)
+            node = this.parseAccessors(node)
             return node
         }
 
