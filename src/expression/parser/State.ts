@@ -175,7 +175,6 @@ export class State {
     }
 
     isNumber() {
-
         // check for a number
         if (this.chars.isDigitDot()) {
             this.token.setTypeTo_NUMBER();
