@@ -16,16 +16,16 @@ export const DELIMITERS: any = {
     ']': true,
     '{': false, // false
     '}': false, // false
-    '"': true,
-    '\'': true,
+    '"': false, // false
+    '\'': false, // false
     ';': false, // false
 
     '+': true,
     '-': true,
     '*': true,
-    '.*': true,
+    '.*': false, // false
     '/': true,
-    './': true,
+    './': false, // false
     '%': true,
     '^': true,
     '.^': false, // false
@@ -44,7 +44,7 @@ export const DELIMITERS: any = {
     '>': true,
     '<=': true,
     '>=': true,
-    '.EQ.': true,
+    // '.EQ.': true,
     '.NE.': true,
     '.GT.': true,
     '.GE.': true,

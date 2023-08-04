@@ -6,416 +6,20 @@
  * commit: https://github.com/josdejong/mathjs/commit/59320053fd35e64351713c4ef32af37df1f4c425
  */
 
-import { isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode } from "../utils/is";
-import { hasOwnProperty } from "../utils/object";
-import { CONSTANTS, DELIMITERS, NAMED_DELIMITERS, NUMERIC_CONSTANTS, TOKENTYPE } from "./constants"
+import { isAccessorNode, isConstantNode, isFunctionNode, isOperatorNode, isSymbolNode } from "../../utils/is";
+import { hasOwnProperty } from "../../utils/object";
+import { CONSTANTS, DELIMITERS, NAMED_DELIMITERS, NUMERIC_CONSTANTS, TOKENTYPE } from "../constants"
+import { State } from "./State";
 
-type State = {
-    extraNodes: Object; // current extra nodes, must be careful not to mutate
-    expression: string; // current expression
-    comment: string; // last parsed comment
-    index: number; // current index in expr
-    token: string; // current token
-    tokenType: number; // type of the token
-    nestingLevel: number; // level of nesting inside parameters, used to ignore newline characters
-    conditionalLevel: any; // when a conditional is being parsed, the level of the conditional is stored here
-}
+import * as helper from "./helper";
 
 export class Parser {
     private state: State;
 
-    constructor(private text: string) {
-        this.state = this.initialState();
-    }
 
-    initialState(): State {
-        return {
-            extraNodes: {}, // current extra nodes, must be careful not to mutate
-            expression: '', // current expression
-            comment: '', // last parsed comment
-            index: 0, // current index in expr
-            token: '', // current token
-            tokenType: TOKENTYPE.NULL, // type of the token
-            nestingLevel: 0, // level of nesting inside parameters, used to ignore newline characters
-            conditionalLevel: null // when a conditional is being parsed, the level of the conditional is stored here
-        }
-    }
 
-    private isToken(token: string): boolean {
-        return this.state.token !== token;
-    }
-    /**
-     * View upto `length` characters of the expression starting at the current character.
-     *
-     * @param {Object} state
-     * @param {number} [length=1] Number of characters to view
-     * @returns {string}
-     * @private
-     */
-    private currentString(length: number = 1): string {
-        return this.state.expression.substr(this.state.index, length)
-    }
 
-    /**
-     * View the current character. Returns '' if end of expression is reached.
-     *
-     * @param {Object} state
-     * @returns {string}
-     * @private
-     */
-    private currentCharacter(): string {
-        return this.currentString(1)
-    }
 
-    /**
-     * Get the next character from the expression.
-     * The character is stored into the char c. If the end of the expression is
-     * reached, the function puts an empty string in c.
-     * @private
-     */
-    private next() {
-        this.state.index++
-    }
-
-    /**
-     * Preview the previous character from the expression.
-     * @return {string} cNext
-     * @private
-     */
-    private prevCharacter(): string {
-        return this.state.expression.charAt(this.state.index - 1)
-    }
-
-    /**
-     * Preview the next character from the expression.
-     * @return {string} cNext
-     * @private
-     */
-    private nextCharacter(): string {
-        return this.state.expression.charAt(this.state.index + 1)
-    }
-
-    /**
-     * Get next token in the current string expr.
-     * The token and token type are available as token and tokenType
-     * @private
-     */
-    private getToken() {
-        this.state.tokenType = TOKENTYPE.NULL
-        this.state.token = ''
-        this.state.comment = ''
-
-        // skip over ignored characters:
-        while (true) {
-            // comments:
-            if (this.currentCharacter() === '#') {
-                while (this.currentCharacter() !== '\n' &&
-                    this.currentCharacter() !== '') {
-                    this.state.comment += this.currentCharacter()
-                    this.next()
-                }
-            }
-            // whitespace: space, tab, and newline when inside parameters
-            if (this.isWhitespace(this.currentCharacter(), this.state.nestingLevel)) {
-                this.next()
-            } else {
-                break
-            }
-        }
-
-        // check for end of expression
-        if (this.currentCharacter() === '') {
-            // token is still empty
-            this.state.tokenType = TOKENTYPE.DELIMITER
-            return
-        }
-
-        // check for new line character
-        if (this.currentCharacter() === '\n' && !this.state.nestingLevel) {
-            this.state.tokenType = TOKENTYPE.DELIMITER
-            this.state.token = this.currentCharacter()
-            this.next()
-            return
-        }
-
-        const c1 = this.currentCharacter()
-        const c2 = this.currentString(2)
-        const c3 = this.currentString(3)
-        if (c3.length === 3 && DELIMITERS[c3]) {
-            this.state.tokenType = TOKENTYPE.DELIMITER
-            this.state.token = c3
-            this.next()
-            this.next()
-            this.next()
-            return
-        }
-
-        // check for delimiters consisting of 2 characters
-        if (c2.length === 2 && DELIMITERS[c2]) {
-            this.state.tokenType = TOKENTYPE.DELIMITER
-            this.state.token = c2
-            this.next()
-            this.next()
-            return
-        }
-
-        // check for delimiters consisting of 1 character
-        if (DELIMITERS[c1]) {
-            this.state.tokenType = TOKENTYPE.DELIMITER
-            this.state.token = c1
-            this.next()
-            return
-        }
-
-        // check for a number
-        if (this.isDigitDot(c1)) {
-            this.state.tokenType = TOKENTYPE.NUMBER
-
-            // check for binary, octal, or hex
-            const c2 = this.currentString(2)
-            if (c2 === '0b' || c2 === '0o' || c2 === '0x') {
-                this.state.token += this.currentCharacter()
-                this.next()
-                this.state.token += this.currentCharacter()
-                this.next()
-                while (this.isHexDigit(this.currentCharacter())) {
-                    this.state.token += this.currentCharacter()
-                    this.next()
-                }
-                if (this.currentCharacter() === '.') {
-                    // this number has a radix point
-                    this.state.token += '.'
-                    this.next()
-                    // get the digits after the radix
-                    while (this.isHexDigit(this.currentCharacter())) {
-                        this.state.token += this.currentCharacter()
-                        this.next()
-                    }
-                } else if (this.currentCharacter() === 'i') {
-                    // this number has a word size suffix
-                    this.state.token += 'i'
-                    this.next()
-                    // get the word size
-                    while (this.isDigit(this.currentCharacter())) {
-                        this.state.token += this.currentCharacter()
-                        this.next()
-                    }
-                }
-                return
-            }
-
-            // get number, can have a single dot
-            if (this.currentCharacter() === '.') {
-                this.state.token += this.currentCharacter()
-                this.next()
-
-                if (!this.isDigit(this.currentCharacter())) {
-                    // this is no number, it is just a dot (can be dot notation)
-                    this.state.tokenType = TOKENTYPE.DELIMITER
-                    return
-                }
-            } else {
-                while (this.isDigit(this.currentCharacter())) {
-                    this.state.token += this.currentCharacter()
-                    this.next()
-                }
-                if (this.isDecimalMark(this.currentCharacter(), this.nextCharacter())) {
-                    this.state.token += this.currentCharacter()
-                    this.next()
-                }
-            }
-
-            while (this.isDigit(this.currentCharacter())) {
-                this.state.token += this.currentCharacter()
-                this.next()
-            }
-            // check for exponential notation like "2.3e-4", "1.23e50" or "2e+4"
-            if (this.currentCharacter() === 'E' || this.currentCharacter() === 'e') {
-                if (this.isDigit(this.nextCharacter()) || this.nextCharacter() === '-' || this.nextCharacter() === '+') {
-                    this.state.token += this.currentCharacter()
-                    this.next()
-
-                    if (this.currentCharacter() === '+' || this.currentCharacter() === '-') {
-                        this.state.token += this.currentCharacter()
-                        this.next()
-                    }
-                    // Scientific notation MUST be followed by an exponent
-                    if (!this.isDigit(this.currentCharacter())) {
-                        throw this.createSyntaxError('Digit expected, got "' + this.currentCharacter() + '"')
-                    }
-
-                    while (this.isDigit(this.currentCharacter())) {
-                        this.state.token += this.currentCharacter()
-                        this.next()
-                    }
-
-                    if (this.isDecimalMark(this.currentCharacter(), this.nextCharacter())) {
-                        throw this.createSyntaxError('Digit expected, got "' + this.currentCharacter() + '"')
-                    }
-                } else if (this.nextCharacter() === '.') {
-                    this.next()
-                    throw this.createSyntaxError('Digit expected, got "' + this.currentCharacter() + '"')
-                }
-            }
-
-            return
-        }
-
-        // check for variables, functions, named operators
-        if (this.isAlpha(this.currentCharacter(), this.prevCharacter(), this.nextCharacter())) {
-            while (this.isAlpha(this.currentCharacter(), this.prevCharacter(), this.nextCharacter()) || this.isDigit(this.currentCharacter())) {
-                this.state.token += this.currentCharacter()
-                this.next()
-            }
-
-            if (hasOwnProperty(NAMED_DELIMITERS, this.state.token)) {
-                this.state.tokenType = TOKENTYPE.DELIMITER
-            } else {
-                this.state.tokenType = TOKENTYPE.SYMBOL
-            }
-
-            return
-        }
-
-        // something unknown is found, wrong characters -> a syntax error
-        this.state.tokenType = TOKENTYPE.UNKNOWN
-        while (this.currentCharacter() !== '') {
-            this.state.token += this.currentCharacter()
-            this.next()
-        }
-        throw this.createSyntaxError('Syntax error in part "' + this.state.token + '"')
-    }
-
-    /**
-     * Get next token and skip newline tokens
-     */
-    getTokenSkipNewline() {
-        do {
-            this.getToken()
-        }
-        while (this.isToken('\n')) // eslint-disable-line no-unmodified-loop-condition
-    }
-
-    /**
-     * Open parameters.
-     * New line characters will be ignored untilthis.closeParams() is called
-     */
-    openParams() {
-        this.state.nestingLevel++
-    }
-
-    /**
-     * Close parameters.
-     * New line characters will no longer be ignored
-     */
-    closeParams() {
-        this.state.nestingLevel--
-    }
-
-    /**
-     * Checks whether the current character `c` is a valid alpha character:
-     *
-     * - A latin letter (upper or lower case) Ascii: a-z, A-Z
-     * - An underscore                        Ascii: _
-     * - A dollar sign                        Ascii: $
-     * - A latin letter with accents          Unicode: \u00C0 - \u02AF
-     * - A greek letter                       Unicode: \u0370 - \u03FF
-     * - A mathematical alphanumeric symbol   Unicode: \u{1D400} - \u{1D7FF} excluding invalid code points
-     *
-     * The previous and next characters are needed to determine whether
-     * this character is part of a unicode surrogate pair.
-     *
-     * @param {string} c      Current character in the expression
-     * @param {string} cPrev  Previous character
-     * @param {string} cNext  Next character
-     * @return {boolean}
-     */
-    isAlpha(c: string, cPrev: string, cNext: string) {
-        return this.isValidLatinOrGreek(c) ||
-            this.isValidMathSymbol(c, cNext) ||
-            this.isValidMathSymbol(cPrev, c)
-    }
-
-    /**
-     * Test whether a character is a valid latin, greek, or letter-like character
-     * @param {string} c
-     * @return {boolean}
-     */
-    isValidLatinOrGreek(c: string) {
-        return /^[a-zA-Z_$\u00C0-\u02AF\u0370-\u03FF\u2100-\u214F]$/.test(c)
-    }
-
-    /**
-     * Test whether two given 16 bit characters form a surrogate pair of a
-     * unicode math symbol.
-     *
-     * https://unicode-table.com/en/
-     * https://www.wikiwand.com/en/Mathematical_operators_and_symbols_in_Unicode
-     *
-     * Note: In ES6 will be unicode aware:
-     * https://stackoverflow.com/questions/280712/javascript-unicode-regexes
-     * https://mathiasbynens.be/notes/es6-unicode-regex
-     *
-     * @param {string} high
-     * @param {string} low
-     * @return {boolean}
-     */
-    private isValidMathSymbol(high: string, low: string): boolean {
-        return /^[\uD835]$/.test(high) &&
-            /^[\uDC00-\uDFFF]$/.test(low) &&
-            /^[^\uDC55\uDC9D\uDCA0\uDCA1\uDCA3\uDCA4\uDCA7\uDCA8\uDCAD\uDCBA\uDCBC\uDCC4\uDD06\uDD0B\uDD0C\uDD15\uDD1D\uDD3A\uDD3F\uDD45\uDD47-\uDD49\uDD51\uDEA6\uDEA7\uDFCC\uDFCD]$/.test(low)
-    }
-
-    /**
-     * Check whether given character c is a white space character: space, tab, or enter
-     * @param {string} c
-     * @param {number} nestingLevel
-     * @return {boolean}
-     */
-    private isWhitespace(c: string, nestingLevel: number): boolean {
-        // TODO: also take '\r' carriage return as newline? Or does that give problems on mac?
-        return c === ' ' || c === '\t' || (c === '\n' && nestingLevel > 0)
-    }
-
-    /**
-     * Test whether the character c is a decimal mark (dot).
-     * This is the case when it's not the start of a delimiter '.*', './', or '.^'
-     * @param {string} c
-     * @param {string} cNext
-     * @return {boolean}
-     */
-    isDecimalMark(c: string, cNext: string) {
-        return c === '.' && cNext !== '/' && cNext !== '*' && cNext !== '^'
-    }
-
-    /**
-     * checks if the given char c is a digit or dot
-     * @param {string} c   a string with one character
-     * @return {boolean}
-     */
-    isDigitDot(c: string) {
-        return ((c >= '0' && c <= '9') || c === '.')
-    }
-
-    /**
-     * checks if the given char c is a digit
-     * @param {string} c   a string with one character
-     * @return {boolean}
-     */
-    isDigit(c: string) {
-        return (c >= '0' && c <= '9')
-    }
-
-    /**
-     * checks if the given char c is a hex digit
-     * @param {string} c   a string with one character
-     * @return {boolean}
-     */
-    isHexDigit(c: string) {
-        return ((c >= '0' && c <= '9') ||
-            (c >= 'a' && c <= 'f') ||
-            (c >= 'A' && c <= 'F'))
-    }
 
     /**
      * Start of the parse levels below, in order of precedence
@@ -423,9 +27,8 @@ export class Parser {
      * @private
      */
     parseStart(expression: string, extraNodes) {
-        const state = this.initialState()
-        Object.assign(state, { expression, extraNodes })
-        this.getToken()
+        const state = new State(expression, extraNodes);
+        state.getToken()
 
         const node = this.parseBlock()
 
@@ -453,9 +56,9 @@ export class Parser {
      * @private
      */
     parseBlock() {
-        let node
-        const blocks = []
-        let visible
+        let node;
+        const blocks = [];
+        let visible;
 
         if (this.state.token !== '' && this.state.token !== '\n' && this.state.token !== ';') {
             node = this.parseAssignment()
@@ -905,11 +508,11 @@ export class Parser {
 
         while (true) {
             if ((this.state.tokenType === TOKENTYPE.SYMBOL) ||
-                (this.state.token === 'in' && this.isConstantNode(node)) ||
+                (this.state.token === 'in' && isConstantNode(node)) ||
                 (this.state.tokenType === TOKENTYPE.NUMBER &&
-                    this.!isConstantNode(last) &&
-                        (!isOperatorNode(last) || last.op === '!')) ||
-                            (this.state.token === '(')) {
+                    !isConstantNode(last) &&
+                    (!isOperatorNode(last) || last.op === '!')) ||
+                (this.state.token === '(')) {
                 // parse implicit multiplication
                 //
                 // symbol:      implicit multiplication like '2a', '(2+3)a', 'a b'
@@ -941,7 +544,7 @@ export class Parser {
 
         while (true) {
             // Match the "number /" part of the pattern "number / number symbol"
-            if (this.state.token === '/' && this.rule2Node(last)) {
+            if (this.isToken('/') && this.rule2Node(last)) {
                 // Look ahead to see if the next token is a number
                 tokenStates.push(Object.assign({}, state))
                 this.getTokenSkipNewline()
@@ -1205,7 +808,7 @@ export class Parser {
      * @return {Node} node
      * @private
      */
-    parseAccessors(node, types) {
+    parseAccessors(node, types?) {
         let params
 
         while ((this.state.token === '(' || this.state.token === '[' || this.state.token === '.') &&
@@ -1257,7 +860,7 @@ export class Parser {
                 }
 
                 if (!this.isToken(']')) {
-                    throw createSyntaxError('Parenthesis ] expected')
+                    throw this.createSyntaxError('Parenthesis ] expected')
                 }
                 this.closeParams()
                 this.getToken()
@@ -1268,7 +871,7 @@ export class Parser {
                 this.getToken()
 
                 if (this.state.tokenType !== TOKENTYPE.SYMBOL) {
-                    throw createSyntaxError('Property name expected after dot')
+                    throw this.createSyntaxError('Property name expected after dot')
                 }
                 params.push(new ConstantNode(this.state.token))
                 this.getToken()
@@ -1301,7 +904,7 @@ export class Parser {
             return node
         }
 
-        return parseSingleQuotesString()
+        return this.parseSingleQuotesString()
     }
 
     /**
@@ -1311,8 +914,8 @@ export class Parser {
     parseDoubleQuotesStringToken() {
         let str = ''
 
-        while (currentCharacter() !== '' && this.currentCharacter() !== '"') {
-            if (currentCharacter() === '\\') {
+        while (this.currentCharacter() !== '' && this.currentCharacter() !== '"') {
+            if (this.currentCharacter() === '\\') {
                 // escape character, immediately process the next
                 // character to prevent stopping at a next '\"'
                 str += this.currentCharacter()
@@ -1325,7 +928,7 @@ export class Parser {
 
         this.getToken()
         if (this.state.token !== '"') {
-            throw createSyntaxError('End of string " expected')
+            throw this.createSyntaxError('End of string " expected')
         }
         this.getToken()
 
@@ -1352,7 +955,7 @@ export class Parser {
             return node
         }
 
-        return parseMatrix()
+        return this.parseMatrix()
     }
 
     /**
@@ -1362,8 +965,8 @@ export class Parser {
     parseSingleQuotesStringToken() {
         let str = ''
 
-        while (currentCharacter() !== '' && this.currentCharacter() !== '\'') {
-            if (currentCharacter() === '\\') {
+        while (this.currentCharacter() !== '' && this.currentCharacter() !== '\'') {
+            if (this.currentCharacter() === '\\') {
                 // escape character, immediately process the next
                 // character to prevent stopping at a next '\''
                 str += this.currentCharacter()
@@ -1376,7 +979,7 @@ export class Parser {
 
         this.getToken()
         if (this.state.token !== '\'') {
-            throw createSyntaxError('End of string \' expected')
+            throw this.createSyntaxError('End of string \' expected')
         }
         this.getToken()
 
@@ -1396,24 +999,24 @@ export class Parser {
             this.openParams()
             this.getToken()
 
-            if (this.state.token !== ']') {
+            if (!this.isToken(']')) {
                 // this is a non-empty matrix
                 const row = this.parseRow()
 
-                if (this.state.token === ';') {
+                if (this.isToken(';')) {
                     // 2 dimensional array
                     rows = 1
                     params = [row]
 
                     // the rows of the matrix are separated by dot-comma's
-                    while (this.state.token === ';') { // eslint-disable-line no-unmodified-loop-condition
+                    while (this.isToken(';')) { // eslint-disable-line no-unmodified-loop-condition
                         this.getToken()
 
                         params[rows] = this.parseRow()
                         rows++
                     }
 
-                    if (this.state.token !== ']') {
+                    if (!this.isToken(']')) {
                         throw this.createSyntaxError('End of matrix ] expected')
                     }
                     this.closeParams()
@@ -1431,7 +1034,7 @@ export class Parser {
                     array = new ArrayNode(params)
                 } else {
                     // 1 dimensional vector
-                    if (this.state.token !== ']') {
+                    if (!this.isToken(']')) {
                         throw this.createSyntaxError('End of matrix ] expected')
                     }
                     this.closeParams()
@@ -1485,21 +1088,21 @@ export class Parser {
             do {
                 this.getToken()
 
-                if (this.state.token !== '}') {
+                if (!this.isToken('}')) {
                     // parse key
-                    if (this.state.token === '"') {
+                    if (this.isToken('"')) {
                         key = this.parseDoubleQuotesStringToken()
-                    } else if (this.state.token === '\'') {
+                    } else if (this.isToken('\'')) {
                         key = this.parseSingleQuotesStringToken()
                     } else if (this.state.tokenType === TOKENTYPE.SYMBOL || (this.state.tokenType === TOKENTYPE.DELIMITER && this.state.token in NAMED_DELIMITERS)) {
                         key = this.state.token
                         this.getToken()
                     } else {
-                        throw createSyntaxError('Symbol or string expected as object key')
+                        throw this.createSyntaxError('Symbol or string expected as object key')
                     }
 
                     // parse key/value separator
-                    if (this.state.token !== ':') {
+                    if (!this.isToken(':')) {
                         throw this.createSyntaxError('Colon : expected after object key')
                     }
                     this.getToken()
@@ -1508,10 +1111,10 @@ export class Parser {
                     properties[key] = this.parseAssignment()
                 }
             }
-            while (this.state.token === ',') // eslint-disable-line no-unmodified-loop-condition
+            while (this.isToken(',')) // eslint-disable-line no-unmodified-loop-condition
 
-            if (this.state.token !== '}') {
-                throw createSyntaxError('Comma , or bracket } expected after object value')
+            if (!this.isToken('}')) {
+                throw this.createSyntaxError('Comma , or bracket } expected after object value')
             }
             this.closeParams()
             this.getToken()
@@ -1562,7 +1165,7 @@ export class Parser {
 
             node = this.parseAssignment() // start again
 
-            if (this.state.token !== ')') {
+            if (!this.isToken(')')) {
                 throw this.createSyntaxError('Parenthesis ) expected')
             }
             this.closeParams()
@@ -1573,7 +1176,7 @@ export class Parser {
             return node
         }
 
-        return parseEnd()
+        return this.parseEnd()
     }
 
     /**
@@ -1582,7 +1185,7 @@ export class Parser {
      * @private
      */
     parseEnd() {
-        if (this.state.token === '') {
+        if (this.isToken('')) {
             // syntax error or unexpected end of expression
             throw this.createSyntaxError('Unexpected end of expression')
         } else {
@@ -1638,11 +1241,11 @@ export class Parser {
         return error
     }
 
-// Now that we can parse, automatically convert strings to Nodes by parsing
-typed.addConversion({ from: 'string', to: 'Node', convert: parse })
+    // // Now that we can parse, automatically convert strings to Nodes by parsing
+    // typed.addConversion({ from: 'string', to: 'Node', convert: parse })
 
-return parse
-    })
-    
+    // return parse
+    //     })
+
 
 }
