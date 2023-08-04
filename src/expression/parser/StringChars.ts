@@ -1,5 +1,5 @@
 import { DELIMITERS } from "../constants";
-import { isDecimalMark, isDigit, isDigitDot, isWhitespace } from "./helper";
+import { isAlpha, isDecimalMark, isDigit, isDigitDot, isHexDigit, isWhitespace } from "./helper";
 
 export class StringChars {
     private expression: string = '';
@@ -89,11 +89,11 @@ export class StringChars {
         return false;
     }
 
-    isDigitDot(step: number = 1): boolean {
-        return isDigitDot(this.currentString(step));
+    isDigitDot(): boolean {
+        return isDigitDot(this.current);
     }
-    isDigit(step: number = 1): boolean {
-        return isDigit(this.currentString(step));
+    isDigit(offset: number = 0): boolean {
+        return isDigit(this.next(offset));
     }
 
     isWhitespace(nestingLevel: number) {
@@ -103,5 +103,11 @@ export class StringChars {
     isDecimalMark(): boolean {
         return isDecimalMark(this.current, this.next());
     }
+    isHexDigit(): boolean {
+        return isHexDigit(this.current);
+    }
 
+    isAlpha() {
+        return isAlpha(this.current, this.prev(), this.next());
+    }
 }

@@ -74,4 +74,8 @@ export class Token {
     setTypeTo_NUMBER() {
         this.setType(TOKENTYPE.NUMBER);
     }
+    setTypeTo_SYMBOL() {
+        this.setType(TOKENTYPE.SYMBOL);
+    }
+
 }

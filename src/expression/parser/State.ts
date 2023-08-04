@@ -86,11 +86,11 @@ export class State {
         this.chars.incrementIndex(token.length);
     }
     setCurrent(type?: number) {
-        this.token.set(this.chars.currentCharacter(), type);
+        this.token.set(this.chars.current, type);
         this.chars.incrementIndex();
     }
     appendCurrent(type?: number) {
-        this.token.set(this.chars.currentCharacter(), type);
+        this.token.append(this.chars.current, type);
         this.chars.incrementIndex();
     }
 
@@ -209,14 +209,14 @@ export class State {
                     return false;
                 }
             } else {
-                while (this.chars.isDigit()) this.appendCurrent();
+                this.appendAllDigits();
                 if (this.chars.isDecimalMark()) this.appendCurrent();
             }
 
-            while (this.chars.isDigit()) this.appendCurrent();
+            this.appendAllDigits();
             // check for exponential notation like "2.3e-4", "1.23e50" or "2e+4"
             if (this.chars.isCurrent('E') || this.chars.isCurrent('e')) {
-                if (this.chars.isDigit() || this.chars.isNext('-') || this.chars.isNext('+')) {
+                if (this.chars.isDigit(1) || this.chars.isNext('-') || this.chars.isNext('+')) {
                     this.appendCurrent();
 
                     if (this.chars.isCurrent('+') || this.chars.isCurrent('-')) this.appendCurrent();
@@ -224,19 +224,16 @@ export class State {
                     // Scientific notation MUST be followed by an exponent
                     if (!this.chars.isDigit()) {
                         // throw this.createSyntaxError('Digit expected, got "' + this.currentCharacter() + '"')
-                        throw new Error('Digit expected, got "' + this.currentCharacter() + '"')
+                        throw new Error('Digit expected, got "' + this.chars.current + '"')
                     }
 
-                    while (this.chars.isDigit()) {
-                        this.appendToken(this.currentCharacter());
-                        this.next()
-                    }
+                    this.appendAllDigits();
 
                     if (this.chars.isDecimalMark()) {
                         // throw this.createSyntaxError('Digit expected, got "' + this.currentCharacter() + '"')
                         throw new Error('Digit expected, got "' + this.chars.currentCharacter() + '"')
                     }
-                } else if (this.chars.next() === '.') {
+                } else if (this.chars.isNext('.')) {
                     this.chars.incrementIndex()
                     // throw this.createSyntaxError('Digit expected, got "' + this.currentCharacter() + '"')
                     throw new Error('Digit expected, got "' + this.chars.currentCharacter() + '"')
@@ -251,35 +248,25 @@ export class State {
 
     is_bi_oct_hex(): boolean {
         // check for binary, octal, or hex
-        const c2 = this.currentString(2)
+        const c2 = this.chars.currentString(2)
         if (c2 === '0b' || c2 === '0o' || c2 === '0x') {
-            this.setTokenType(TOKENTYPE.NUMBER);
-            this.appendToken(this.currentCharacter());
-            this.next()
-            this.appendToken(this.currentCharacter());
-            this.next()
-            while (isHexDigit(this.currentCharacter())) {
-                this.appendToken(this.currentCharacter());
-                this.next()
-            }
-            if (this.isCurrChar('.')) {
+            this.appendCurrent(TOKENTYPE.NUMBER);
+            this.appendCurrent();
+            this.appendAllHexDigits();
+
+            if (this.chars.isCurrent('.')) {
                 // this number has a radix point
-                this.appendToken('.');
-                this.next()
+                this.set('.');
+
                 // get the digits after the radix
-                while (isHexDigit(this.currentCharacter())) {
-                    this.appendToken(this.currentCharacter());
-                    this.next()
-                }
-            } else if (this.isCurrChar('i')) {
+                this.appendAllHexDigits()
+
+            } else if (this.chars.isCurrent('i')) {
                 // this number has a word size suffix
-                this.appendToken('i');
-                this.next()
+                this.set('i');
                 // get the word size
-                while (isDigit(this.currentCharacter())) {
-                    this.appendToken(this.currentCharacter());
-                    this.next()
-                }
+                this.appendAllDigits();
+
             }
             return true;
         }
@@ -288,16 +275,13 @@ export class State {
     }
     is_variable_function_namedOperator(): boolean {
         // check for variables, functions, named operators
-        if (isAlpha(this.currentCharacter(), this.prevCharacter(), this.nextCharacter())) {
-            while (isAlpha(this.currentCharacter(), this.prevCharacter(), this.nextCharacter()) || isDigit(this.currentCharacter())) {
-                this.appendToken(this.currentCharacter());
-                this.next()
-            }
+        if (this.chars.isAlpha()) {
+            while (this.chars.isAlpha() || this.chars.isDigit()) this.appendCurrent()
 
-            if (hasOwnProperty(NAMED_DELIMITERS, this.token)) {
-                this.setTokenType(TOKENTYPE.DELIMITER);
+            if (hasOwnProperty(NAMED_DELIMITERS, this.tokenValue)) {
+                this.token.setTypeTo_DELIMITER();
             } else {
-                this.setTokenType(TOKENTYPE.SYMBOL);
+                this.token.setTypeTo_SYMBOL();
             }
 
             return true;
@@ -312,7 +296,7 @@ export class State {
         do {
             this.getToken()
         }
-        while (this.isToken('\n')) // eslint-disable-line no-unmodified-loop-condition
+        while (this.token.equal('\n')) // eslint-disable-line no-unmodified-loop-condition
     }
 
     /**
@@ -329,6 +313,13 @@ export class State {
      */
     closeParams() {
         this.state.nestingLevel--
+    }
+
+    appendAllDigits() {
+        while (this.chars.isDigit()) this.appendCurrent();
+    }
+    appendAllHexDigits() {
+        while (this.chars.isHexDigit()) this.appendCurrent();
     }
 }
 

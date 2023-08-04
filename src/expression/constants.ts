@@ -44,7 +44,7 @@ export const DELIMITERS: any = {
     '>': true,
     '<=': true,
     '>=': true,
-    // '.EQ.': true,
+    '.EQ.': true,
     '.NE.': true,
     '.GT.': true,
     '.GE.': true,
