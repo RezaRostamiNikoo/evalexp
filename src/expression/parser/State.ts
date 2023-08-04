@@ -164,31 +164,12 @@ export class State {
     }
 
     isDelimiter() {
-        const c1 = this.chars.currentCharacter()
-        const c2 = this.chars.currentString(2)
-        const c3 = this.chars.currentString(3)
-        const c4 = this.chars.currentString(4)
-
-        if (c4.length === 4 && DELIMITERS[c4]) {
-            this.set(c4, TOKENTYPE.DELIMITER);
-            return true;
-        }
-
-        if (c3.length === 3 && DELIMITERS[c3]) {
-            this.set(c3, TOKENTYPE.DELIMITER);
-            return true;
-        }
-
-        // check for delimiters consisting of 2 characters
-        if (c2.length === 2 && DELIMITERS[c2]) {
-            this.set(c2, TOKENTYPE.DELIMITER);
-            return true;
-        }
-
-        // check for delimiters consisting of 1 character
-        if (DELIMITERS[c1]) {
-            this.set(c1, TOKENTYPE.DELIMITER);
-            return true;
+        const maxLengthOfADelimiter = 4;
+        for (let l = maxLengthOfADelimiter; l > 0; l--) {
+            if (this.chars.isDelimiter(l)) {
+                this.set(this.chars.currentString(l), TOKENTYPE.DELIMITER);
+                return true;
+            }
         }
         return false;
     }
