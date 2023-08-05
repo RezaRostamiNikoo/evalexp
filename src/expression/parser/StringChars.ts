@@ -96,8 +96,8 @@ export class StringChars {
         return isDigit(this.next(offset));
     }
 
-    isWhitespace(nestingLevel: number) {
-        return isWhitespace(this.current, nestingLevel);
+    isWhitespace() {
+        return isWhitespace(this.current);
     }
 
     isDecimalMark(): boolean {

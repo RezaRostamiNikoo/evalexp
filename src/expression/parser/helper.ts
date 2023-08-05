@@ -55,12 +55,11 @@ export function isValidMathSymbol(high: string, low: string): boolean {
 /**
  * Check whether given character c is a white space character: space, tab, or enter
  * @param {string} c
- * @param {number} nestingLevel
  * @return {boolean}
  */
-export function isWhitespace(c: string, nestingLevel: number): boolean {
+export function isWhitespace(c: string): boolean {
     // TODO: also take '\r' carriage return as newline? Or does that give problems on mac?
-    return c === ' ' || c === '\t' || (c === '\n' && nestingLevel > 0)
+    return c === ' ' || c === '\t' || c === '\n';;
 }
 
 /**

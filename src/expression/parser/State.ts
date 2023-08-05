@@ -105,19 +105,9 @@ export class State {
 
         this.skipIgnoredCharacters();
         if (this.isEnd()) return this.tokenValue;
-
-        // check for new line character
-        if (this.chars.isCurrent('\n') && !this.nestingLevel) {
-            this.setCurrent();
-            return this.tokenValue;
-        }
-
         if (this.isDelimiter()) return this.tokenValue;
-
         if (this.is_bi_oct_hex()) return this.tokenValue;
-
         if (this.isNumber()) return this.tokenValue;
-
         if (this.is_variable_function_namedOperator()) return this.tokenValue;
 
         // something unknown is found, wrong characters -> a syntax error
@@ -133,15 +123,11 @@ export class State {
     skipIgnoredCharacters() {
         // skip over ignored characters:
         while (true) {
-            // comments:
-            if (this.chars.isCurrent('#')) {
-                while (!this.chars.isCurrent('\n') && !this.chars.isCurrent('')) {
-                    this.appendComment(this.chars.currentCharacter());
-                    this.chars.incrementIndex();
-                }
-            }
+            // TODO: you can add whatever you want to be ignored here
             // whitespace: space, tab, and newline when inside parameters
-            if (this.chars.isWhitespace(this.nestingLevel)) {
+            if (this.chars.isWhitespace()) {
+                // I changed thesource code from mathjs: so that it recognize \n as white space and 
+                // the nesting level doesn't matter 
                 this.chars.incrementIndex();
             } else {
                 break
