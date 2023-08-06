@@ -1,4 +1,4 @@
-import { TOKENTYPE } from "../../constants"
+import { TOKENTYPE } from "../constants"
 import { State } from "../State"
 import { parseRelational } from "./parseRelational"
 import { parseSymbol } from "./parseSymbol"
@@ -60,7 +60,7 @@ export function parseCustomNodes(state:State) {
                 throw this.createSyntaxError('Parenthesis ) expected')
             }
             this.closeParams()
-            state.getToken()
+            state.getNextToken()
         }
 
         // create a new custom node

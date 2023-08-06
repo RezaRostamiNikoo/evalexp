@@ -1,5 +1,5 @@
 import { isConstantNode, isOperatorNode } from "../../../utils/is"
-import { TOKENTYPE } from "../../constants"
+import { TOKENTYPE } from "../constants"
 import { State } from "../State"
 import { parseRule2 } from "./parseRule2"
 

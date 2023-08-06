@@ -1,4 +1,4 @@
-import { TOKENTYPE } from "../../constants"
+import { TOKENTYPE } from "../constants"
 import { parseRelational } from "./parseRelational"
 
 /**

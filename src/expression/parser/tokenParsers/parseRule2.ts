@@ -1,5 +1,5 @@
 import { rule2Node } from "../../../utils/is"
-import { TOKENTYPE } from "../../constants"
+import { TOKENTYPE } from "../constants"
 import { State } from "../State"
 import { parsePercentage } from "./parsePercentage"
 

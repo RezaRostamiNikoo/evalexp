@@ -1,5 +1,5 @@
 import { hasOwnProperty } from "../../../utils/object"
-import { TOKENTYPE } from "../../constants"
+import { TOKENTYPE } from "../constants"
 import { State } from "../State"
 import { parseUnary } from "./parseUnary"
 

@@ -1,4 +1,1 @@
-
-export const lloogg = (text: string) => {
-    console.log(text);
-}
+export * from "./expression/parser"

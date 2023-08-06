@@ -1,12 +1,17 @@
-import { TOKENTYPE } from "../constants";
+import { TokenType } from "./types";
 
 export class Token {
-    private _value: string = '';
-    private _type: number = TOKENTYPE.NULL;
+    private _value: string = "";
+    private _type: TokenType = "NULL";
+    private _level: number = 0;
+    private next: Token;
+    private prev: Token;
+    private parent: Token;
 
-    constructor(initValue: string, initType: number) {
+    constructor(initValue: string, initType: TokenType, level: number = 0) {
         this._value = initValue;
         this._type = initType;
+        this._level = level;
     }
 
 
@@ -23,7 +28,7 @@ export class Token {
      * it sets token type
      * @param {number} tokenType token type
      */
-    setType(tokenType: number) {
+    setType(tokenType: TokenType) {
         this._type = tokenType;
     }
 
@@ -31,14 +36,21 @@ export class Token {
      * return token
      * @returns {string} returns the current token
      */
-    getValue(): string {
+    get Value(): string {
         return this._value;
     }
     /**
      * return token type
      * @returns {string} returns the current token
      */
-    getType(): number {
+    get Type(): TokenType {
+        return this._type;
+    }
+    /**
+     * return level og token
+     * @returns {number} returns the token 
+     */
+    get Level(): TokenType {
         return this._type;
     }
     /**
@@ -46,7 +58,7 @@ export class Token {
      * @param {string} token token 
      * @param {number} type it is optional. if it is set then at the same time token value and type will be changed 
      */
-    set(token: string, type?: number) {
+    set(token: string, type?: TokenType) {
         this._value = token;
         if (type) this.setType(type);
     }
@@ -56,26 +68,19 @@ export class Token {
      * @param {number} type it is optional. if it is set then at the same time token value and type will be changed 
      * @param {string} token token 
      */
-    append(token: string, type?: number) {
+    append(token: string, type?: TokenType) {
         this._value += token;
         if (type) this.setType(type);
     }
 
+    incrementLevel() { this._level++; }
+    decrementLevel() { this._level--; }
 
-    setTypeTo_DELIMITER() {
-        this.setType(TOKENTYPE.DELIMITER);
-    }
-    setTypeTo_Null() {
-        this.setType(TOKENTYPE.NULL);
-    }
-    setTypeTo_UNKNOWN() {
-        this.setType(TOKENTYPE.UNKNOWN);
-    }
-    setTypeTo_NUMBER() {
-        this.setType(TOKENTYPE.NUMBER);
-    }
-    setTypeTo_SYMBOL() {
-        this.setType(TOKENTYPE.SYMBOL);
-    }
 
+
+    set Next(value: Token) { this.next = value; }
+    set Prev(value: Token) { this.prev = value; }
+
+    get Next() { return this.next; }
+    get Prev() { return this.prev; }
 }

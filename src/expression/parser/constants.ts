@@ -1,12 +1,3 @@
-// token types enumeration
-export const TOKENTYPE = {
-    NULL: 0,
-    DELIMITER: 1,
-    NUMBER: 2,
-    SYMBOL: 3,
-    UNKNOWN: 4
-}
-
 // map with all delimiters
 export const DELIMITERS: any = {
     ',': true,
@@ -57,8 +48,3 @@ export const CONSTANTS = {
     null: null,
     undefined
 }
-
-export const NUMERIC_CONSTANTS = [
-    'NaN',
-    'Infinity'
-]

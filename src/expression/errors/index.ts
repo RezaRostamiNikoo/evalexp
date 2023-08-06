@@ -1,3 +1,6 @@
+export * from "./EmptyExpressionError";
+export * from "./ExpressionSyntaxError";
+
 /**
  * Create an error
  * @param {string} message
