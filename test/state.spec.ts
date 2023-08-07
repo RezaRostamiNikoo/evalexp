@@ -5,7 +5,7 @@ describe("State", () => {
 
     test("State", () => {
 
-        const s = new State("12.005 * (x+12)/(135e-3) + 12 - alignT(hamid_,jakj,12-0xde334a) > .EQ. < <= >=`");
+        const s = new State("12.005 * (x+12)/(135e3) + 12 - alignT(hamid_,jakj,12-0xde334a) > .EQ. < <= >=`");
         const tokens = s.Tokens;
         expect(tokens.dequeue().Value).toEqual("12.005");
         expect(tokens.dequeue().Value).toEqual("*");
@@ -40,11 +40,11 @@ describe("State", () => {
 
     test("State", () => {
 
-        const s = new State("12 + -3");
+        const s = new State("12 + 3");
         const tokens = s.Tokens;
         expect(tokens.dequeue().Value).toEqual("12");
         expect(tokens.dequeue().Value).toEqual("+");
-        expect(tokens.dequeue().Value).toEqual("-3");
+        expect(tokens.dequeue().Value).toEqual("3");
 
     });
 

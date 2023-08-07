@@ -1,4 +1,5 @@
 import { hasOwnProperty } from "../../../utils/object"
+import { OperatorNode } from "../../node/OperatorNode"
 import { State } from "../State"
 import { parseMultiplyDivide } from "./parseMultiplyDivide"
 
@@ -12,22 +13,23 @@ export function parseAddSubtract(state: State) {
 
     node = parseMultiplyDivide(state)
 
+    const token = state.Tokens.peek().Value;
+
     const operators = {
         '+': 'add',
         '-': 'subtract'
     }
-    while (hasOwnProperty(operators, this.state.token)) {
-        name = this.state.token
-        fn = operators[name]
 
-        this.getTokenSkipNewline()
+    while (hasOwnProperty(operators, token)) {
+        fn = operators[token];
+
         const rightNode = this.parseMultiplyDivide()
         if (rightNode.isPercentage) {
             params = [node, new OperatorNode('*', 'multiply', [node, rightNode])]
         } else {
             params = [node, rightNode]
         }
-        node = new OperatorNode(name, fn, params)
+        node = new OperatorNode(token, fn, params)
     }
 
     return node

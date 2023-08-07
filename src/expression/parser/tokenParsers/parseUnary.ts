@@ -1,4 +1,6 @@
 import { hasOwnProperty } from "../../../utils/object"
+import { ExpressionNode } from "../../node/Node"
+import { OperatorNode } from "../../node/OperatorNode"
 import { State } from "../State"
 import { parsePow } from "./parsePow"
 
@@ -7,7 +9,7 @@ import { parsePow } from "./parsePow"
  * @return {Node} node
  * @private
  */
-export function parseUnary(state: State) {
+export function parseUnary(state: State): ExpressionNode {
     let name, params, fn
     const operators = {
         '-': 'unaryMinus',
@@ -15,10 +17,11 @@ export function parseUnary(state: State) {
         // '~': 'bitNot',
         // not: 'not'
     }
+    const token = state.Tokens.peek();
 
-    if (hasOwnProperty(operators, this.state.token)) {
-        fn = operators[this.state.token]
-        name = this.state.token
+    if (hasOwnProperty(operators, token.Value)) {
+        fn = operators[token.Value]
+        name = token
 
         this.getTokenSkipNewline()
         params = [parseUnary(state)]

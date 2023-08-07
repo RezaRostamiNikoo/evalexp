@@ -26,7 +26,7 @@ export function parseAccessors(node, types?) {
                 this.getToken()
 
                 if (!this.isToken(')')) {
-                    params.push(this.parseAssignment())
+                    params.push(parseAssignment())
 
                     // parse a list with parameters
                     while (this.isToken(',')) { // eslint-disable-line no-unmodified-loop-condition
@@ -34,7 +34,7 @@ export function parseAccessors(node, types?) {
                         params.push(this.parseAssignment())
                     }
                 }
-
+ 
                 if (!this.isToken(')')) {
                     throw this.createSyntaxError('Parenthesis ) expected')
                 }

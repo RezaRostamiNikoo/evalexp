@@ -1,4 +1,6 @@
 import { isConstantNode, isOperatorNode } from "../../../utils/is"
+import { ExpressionNode } from "../../node/Node"
+import { OperatorNode } from "../../node/OperatorNode"
 import { TOKENTYPE } from "../constants"
 import { State } from "../State"
 import { parseRule2 } from "./parseRule2"
@@ -8,25 +10,26 @@ import { parseRule2 } from "./parseRule2"
  * @return {Node} node
  * @private
  */
-export function parseImplicitMultiplication(state: State) {
+export function parseImplicitMultiplication(state: State): ExpressionNode {
     let node, last
 
-    node = parseRule2(state)
+    node = parseRule2(state);
     last = node
+    const token = state.Tokens.peek();
 
     while (true) {
-        if ((this.state.tokenType === TOKENTYPE.SYMBOL) ||
-            (this.state.token === 'in' && isConstantNode(node)) ||
-            (this.state.tokenType === TOKENTYPE.NUMBER &&
+        if ((token.Type === TOKENTYPE.SYMBOL) ||
+            (token.Value === 'in' && isConstantNode(node)) ||
+            (token.Type === TOKENTYPE.NUMBER &&
                 !isConstantNode(last) &&
                 (!isOperatorNode(last) || last.op === '!')) ||
-            (this.state.token === '(')) {
+            (token.Value === '(')) {
             // parse implicit multiplication
             //
             // symbol:      implicit multiplication like '2a', '(2+3)a', 'a b'
             // number:      implicit multiplication like '(2+3)2'
             // parenthesis: implicit multiplication likethis.'2(3+4)', '(3+4)(1+2)'
-            last = this.parseRule2()
+            last = parseRule2(state);
             node = new OperatorNode('*', 'multiply', [node, last], true /* implicit */)
         } else {
             break

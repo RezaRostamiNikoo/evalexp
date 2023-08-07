@@ -27,4 +27,11 @@ export class Queue<T> implements IQueue<T>{
     at(index: number): T | undefined {
         return this.items[index];
     };
+
+    get length() { return this.items.length; }
+
+    reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T, initialValue?: unknown): T {
+        return this.items.reduce(callbackfn);
+    }
+
 }

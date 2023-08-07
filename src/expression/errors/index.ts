@@ -1,5 +1,7 @@
 export * from "./EmptyExpressionError";
 export * from "./ExpressionSyntaxError";
+export * from "./ExpressionRuntimeError";
+
 
 /**
  * Create an error

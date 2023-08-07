@@ -1,9 +1,13 @@
+import { ExpressionNode } from "../../node/Node";
+import { State } from "../State";
+import { CONSTANTS } from "../constants";
+
 /**
  * parse symbols: functions, variables, constants, units
  * @return {Node} node
  * @private
  */
-export function parseSymbol() {
+export function parseSymbol(state: State): ExpressionNode {
     let node, name
 
     if (this.state.tokenType === TOKENTYPE.SYMBOL ||

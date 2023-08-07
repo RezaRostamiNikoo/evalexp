@@ -27,4 +27,17 @@ export interface IQueue<T> {
      */
     isEmpty(): boolean
 
+    /**
+     * it return the legth of Queue
+     * @returns {number} returns number
+     */
+    get length(): number;
+
+    forEach(callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: any): void;
+
+    map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[];
+
+    at(index: number): T | undefined;
+
+    reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T): T;
 }

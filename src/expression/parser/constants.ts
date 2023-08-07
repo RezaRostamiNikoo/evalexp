@@ -46,5 +46,8 @@ export const CONSTANTS = {
     true: true,
     false: false,
     null: null,
-    undefined
+    undefined: undefined,
+    FALSE: false,
+    TRUE: true,
+
 }

@@ -1,4 +1,5 @@
 import { ConstantNode } from "../../node/ConstantNode";
+import { ExpressionNode } from "../../node/Node";
 import { State } from "../State";
 import { parseRelational } from "./parseRelational";
 
@@ -9,24 +10,10 @@ import { parseRelational } from "./parseRelational";
   * @return {Node} node
   * @private
   */
-export function parseBlock(state: State) {
-    let node;
-
-    const token = state.tokenValue;
-
-    if (token !== '') {
-        node = parseRelational(state)
-        if (this.state.comment) {
-            node.comment = this.state.comment
-        }
-    }
-
-    if (!node) {
-        node = new ConstantNode(undefined)
-        if (this.state.comment) {
-            node.comment = this.state.comment
-        }
-    }
-
-    return node
+export function parseBlock(state: State): ExpressionNode {
+    let result: ExpressionNode;
+    const token = state.Tokens.peek().Value;
+    if (token !== undefined) result = parseRelational(state)
+    if (!result) result = new ConstantNode(undefined) // TODO: replace it with a throw an Error
+    return result
 }

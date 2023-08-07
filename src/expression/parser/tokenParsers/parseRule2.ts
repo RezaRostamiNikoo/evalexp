@@ -1,5 +1,5 @@
 import { rule2Node } from "../../../utils/is"
-import { TOKENTYPE } from "../constants"
+import { OperatorNode } from "../../node/OperatorNode"
 import { State } from "../State"
 import { parsePercentage } from "./parsePercentage"
 
@@ -16,27 +16,26 @@ export function parseRule2(state: State) {
     let node = parsePercentage(state)
     let last = node
     const tokenStates = []
+    const token = state.Tokens.peek();
 
     while (true) {
         // Match the "number /" part of the pattern "number / number symbol"
-        if (state.token.equal('/') && rule2Node(last)) {
+        if (token.equal('/') && rule2Node(last)) {
             // Look ahead to see if the next token is a number
             tokenStates.push(Object.assign({}, state))
-            state.token.getTokenSkipNewline()
 
             // Match the "number / number" part of the pattern
-            if (state.tokenType === TOKENTYPE.NUMBER) {
+            if (token.Type === "NUMBER") {
                 // Look ahead again
                 tokenStates.push(Object.assign({}, state))
-                state.token.getTokenSkipNewline()
 
                 // Match the "symbol" part of the pattern, or a left parenthesis
-                if (state.tokenType === TOKENTYPE.SYMBOL || state.token.equal('(')) {
+                if (token.Type === "SYMBOL" || token.equal('(')) {
                     // We've matched the pattern "number / number symbol".
                     // Rewind once and build the "number / number" node; the symbol will be consumed later
                     Object.assign(state, tokenStates.pop())
                     tokenStates.pop()
-                    last = parsePercentage(state)
+                    last = parsePercentage(state);
                     node = new OperatorNode('/', 'divide', [node, last])
                 } else {
                     // Not a match, so rewind

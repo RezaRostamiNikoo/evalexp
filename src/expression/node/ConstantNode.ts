@@ -167,3 +167,12 @@
 //   }
 // }
 
+import { ExpressionNode } from "./Node";
+
+export class ConstantNode extends ExpressionNode {
+
+    constructor(private node: ExpressionNode) {
+        super();
+
+    }
+}
