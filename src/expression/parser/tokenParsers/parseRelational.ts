@@ -1,4 +1,5 @@
 import { hasOwnProperty } from "../../../utils/object"
+import { ExpressionNode } from "../../node/Node"
 import { OperatorNode } from "../../node/OperatorNode"
 import { RelationalNode } from "../../node/RelationalNode"
 import { State } from "../State"
@@ -8,12 +9,12 @@ import { parseAddSubtract } from "./parseAddSubtract"
  * Parse a chained conditional, like 'a > b >= c'
  * @return {Node} node
  */
-export function parseRelational(state: State) {
+export function parseRelational(state: State): ExpressionNode {
 
     const params = [parseAddSubtract(state)]
     const conditionals = []
 
-    const token = state.Tokens.peek().Value;
+    const token = state.token;
     const operators = {
         '.EQ.': 'equal',
         '.NE.': 'unequal',
@@ -30,8 +31,8 @@ export function parseRelational(state: State) {
         '>=': 'largerEq',
     }
 
-    while (hasOwnProperty(operators, token)) { // eslint-disable-line no-unmodified-loop-condition
-        const cond = { name: token, fn: operators[token] }
+    while (hasOwnProperty(operators, token.Value)) { // eslint-disable-line no-unmodified-loop-condition
+        const cond = { name: token, fn: operators[token.Value] }
         conditionals.push(cond)
         params.push(parseAddSubtract(state))
     }
@@ -39,10 +40,10 @@ export function parseRelational(state: State) {
     if (params.length === 1) {
         return params[0]
     } else if (params.length === 2) {
-        state.Tokens.dequeue();
+        state.goAHead();
         return new OperatorNode(conditionals[0].name, conditionals[0].fn, params)
     } else {
-        state.Tokens.dequeue();
+        state.goAHead();
         return new RelationalNode(conditionals.map(c => c.fn), params)
     }
 }

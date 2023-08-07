@@ -154,7 +154,7 @@ export function rule2Node(node: any) {
         (isOperatorNode(node) &&
             node.args.length === 1 &&
             isConstantNode(node.args[0]) &&
-            '-+~'.includes(node.op))
+            '-+'.includes(node.op))
 }
 
 export function isFunctionAssignmentNode(x: any) {

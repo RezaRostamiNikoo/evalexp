@@ -1,36 +1,37 @@
-import { ExpressionNode } from "../../node/Node";
-import { State } from "../State";
+import { hasOwnProperty } from "../../../utils/object";
+import { ConstantNode } from "../../node/ConstantNode";
+import { ExpressionNode } from "../../node/Node"
+import { SymbolNode } from "../../node/SymbolNode";
+import { State } from "../State"
 import { CONSTANTS } from "../constants";
+import { parseAccessors } from "./parseAccessors";
+import { parseArray } from "./parseMatrix";
 
 /**
- * parse symbols: functions, variables, constants, units
- * @return {Node} node
- * @private
- */
+  * parse symbols: functions, variables, constants, units
+  * @return {ExpressionNode} node
+  */
 export function parseSymbol(state: State): ExpressionNode {
     let node, name
 
-    if (this.state.tokenType === TOKENTYPE.SYMBOL ||
-        (this.state.tokenType === TOKENTYPE.DELIMITER && this.state.token in NAMED_DELIMITERS)) {
-        name = this.state.token
+    if (state.isType("SYMBOL")) {
+        name = state.token.Value;
 
-        this.getToken()
 
         if (hasOwnProperty(CONSTANTS, name)) { // true, false, null, ...
-            console.log("node = new ConstantNode(CONSTANTS[name])", CONSTANTS, name);
-            // node = new ConstantNode(CONSTANTS[name])
-        } else if (NUMERIC_CONSTANTS.indexOf(name) !== -1) { // NaN, Infinity
-            console.log("node = new ConstantNode(numeric(name, 'number'))", NUMERIC_CONSTANTS, name);
-            // node = new ConstantNode(numeric(name, 'number'))
+            node = new ConstantNode(CONSTANTS[name])
+            // } else if (NUMERIC_CONSTANTS.indexOf(name) !== -1) { // NaN, Infinity
+            //     node = new ConstantNode(numeric(name, 'number'))
         } else {
-            console.log("node = new SymbolNode(name)", name);
-            // node = new SymbolNode(name)
+            node = new SymbolNode(name)
         }
 
+        state.goAHead();
+
         // parse function parameters and matrix index
-        node = this.parseAccessors(node)
-        return node
+        node = parseAccessors(state, node)
+        return node;
     }
 
-    return this.parseDoubleQuotesString()
+    return parseArray(state)
 }

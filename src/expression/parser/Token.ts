@@ -36,23 +36,18 @@ export class Token {
      * return token
      * @returns {string} returns the current token
      */
-    get Value(): string {
-        return this._value;
-    }
+    get Value(): string { return this._value; }
     /**
      * return token type
      * @returns {string} returns the current token
      */
-    get Type(): TokenType {
-        return this._type;
-    }
+    get Type(): TokenType { return this._type; }
     /**
      * return level og token
      * @returns {number} returns the token 
      */
-    get Level(): TokenType {
-        return this._type;
-    }
+    get Level(): TokenType { return this._type; }
+    set Level(value: number) { this._level = value; }
     /**
      * it sets token 
      * @param {string} token token 

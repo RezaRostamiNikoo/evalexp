@@ -1,3 +1,5 @@
+import { State } from "../parser";
+
 export * from "./EmptyExpressionError";
 export * from "./ExpressionSyntaxError";
 export * from "./ExpressionRuntimeError";
@@ -9,7 +11,7 @@ export * from "./ExpressionRuntimeError";
  * @return {SyntaxError} instantiated error
  * @private
  */
-export function createSyntaxError(message: string) {
+export function createSyntaxError(state: State, message: string) {
     const c = this.col();
     const error = new SyntaxError(message + ' (char ' + c + ')');
     (error as any).char = c;

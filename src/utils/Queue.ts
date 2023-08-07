@@ -11,6 +11,7 @@ export class Queue<T> implements IQueue<T>{
     isEmpty(): boolean { return this.items.length == 0; }
 
     enqueue(item: T) { this.items.push(item); }
+    enqueueAtFirst(item: T) { this.items = [item, ...this.items]; }
 
     dequeue(): T { return this.items.shift(); }
 

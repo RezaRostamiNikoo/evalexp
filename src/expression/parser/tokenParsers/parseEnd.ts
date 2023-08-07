@@ -1,13 +1,16 @@
+import { createSyntaxError } from "../../errors"
+import { ExpressionNode } from "../../node/Node"
+
 /**
  * Evaluated when the expression is not yet ended but expected to end
- * @return {Node} res
+ * @return {ExpressionNode} res
  * @private
  */
-export function parseEnd() {
-    if (this.isToken('')) {
+export function parseEnd(state): ExpressionNode {
+    if (state.isToken('')) {
         // syntax error or unexpected end of expression
-        throw this.createSyntaxError('Unexpected end of expression')
+        throw createSyntaxError(state, 'Unexpected end of expression')
     } else {
-        throw this.createSyntaxError('Value expected')
+        throw createSyntaxError(state, 'Value expected')
     }
 }

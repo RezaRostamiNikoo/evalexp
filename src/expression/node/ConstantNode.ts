@@ -170,7 +170,7 @@
 import { ExpressionNode } from "./Node";
 
 export class ConstantNode extends ExpressionNode {
-
+    isConstantNode: boolean = true;
     constructor(private node: ExpressionNode) {
         super();
 

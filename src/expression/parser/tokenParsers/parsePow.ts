@@ -1,22 +1,26 @@
+import { ExpressionNode } from "../../node/Node"
+import { OperatorNode } from "../../node/OperatorNode"
 import { State } from "../State"
-import { parseLeftHandOperators } from "./parseLeftHandOperators"
+import { parseSymbol } from "./parseSymbol"
+import { parseUnary } from "./parseUnary"
 
 /**
- * power
- * Note: power operator is right associative
- * @return {Node} node
- * @private
- */
-export function parsePow(state: State) {
+  * power
+  * Note: power operator is right associative
+  * @return {ExpressionNode} node
+  * @private
+  */
+export function parsePow(state: State): ExpressionNode {
     let node, name, fn, params
 
-    node = parseLeftHandOperators(state)
+    node = parseSymbol(state)
 
-    if (this.state.token === '^') {
-        name = this.state.token
+    if (state.isToken('^')) {
+        name = state.token.Value
         fn = 'pow'
-        this.getTokenSkipNewline()
-        params = [node, this.parseUnary()] // Go back to unary, we can have '2^-3'
+
+        state.goAHead();
+        params = [node, parseUnary(state)] // Go back to unary, we can have '2^-3'
         node = new OperatorNode(name, fn, params)
     }
 

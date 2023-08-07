@@ -1,31 +1,37 @@
-import { parseRelational } from "./parseRelational"
+import { createSyntaxError } from "../../errors";
+import { ExpressionNode } from "../../node/Node"
+import { ParenthesisNode } from "../../node/ParenthesisNode";
+import { State } from "../State"
+import { parseAccessors } from "./parseAccessors";
+import { parseEnd } from "./parseEnd"
+import { parseRelational } from "./parseRelational";
 
 /**
-  * parentheses
-  * @return {Node} node
-  * @private
-  */
-export function parseParentheses() {
+ * parentheses
+ * @return {ExpressionNode} node
+ * @private
+ */
+export function parseParentheses(state: State): ExpressionNode {
     let node
 
     // check if it is a parenthesized expression
-    if (this.state.token === '(') {
+    if (state.isToken('(')) {
         // parentheses (...)
-        this.openParams()
-        this.getToken()
+        state.goAHead();
+        state.nextLevel();
 
         node = parseRelational(state) // start again
 
-        if (!this.isToken(')')) {
-            throw this.createSyntaxError('Parenthesis ) expected')
+        if (!state.isToken(')')) {
+            throw createSyntaxError(state, 'Parenthesis ) expected')
         }
-        this.closeParams()
-        this.getToken()
+        state.prevLevel();
+        state.goAHead();
 
         node = new ParenthesisNode(node)
-        node = this.parseAccessors(node)
+        node = parseAccessors(state, node)
         return node
     }
 
-    return this.parseEnd()
+    return parseEnd(state)
 }

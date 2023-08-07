@@ -5,8 +5,6 @@ export const DELIMITERS: any = {
     ')': true,
     '[': true,
     ']': true,
-    '"': false, // false
-    '\'': false, // false
 
     '+': true,
     '-': true,
@@ -31,16 +29,16 @@ export const DELIMITERS: any = {
 }
 
 
-// map with all named delimiters
-export const NAMED_DELIMITERS = {
-    mod: true,
-    to: true,
-    in: true,
-    and: true,
-    xor: true,
-    or: true,
-    not: true
-}
+// // map with all named delimiters
+// export const NAMED_DELIMITERS = {
+//     mod: true,
+//     to: true,
+//     in: true,
+//     and: true,
+//     xor: true,
+//     or: true,
+//     not: true
+// }
 
 export const CONSTANTS = {
     true: true,
@@ -51,3 +49,8 @@ export const CONSTANTS = {
     TRUE: true,
 
 }
+
+// const NUMERIC_CONSTANTS = [
+//     'NaN',
+//     'Infinity'
+//   ]

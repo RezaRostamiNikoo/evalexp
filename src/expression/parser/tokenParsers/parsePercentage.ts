@@ -1,36 +1,32 @@
 import { hasOwnProperty } from "../../../utils/object"
 import { ConstantNode } from "../../node/ConstantNode"
+import { ExpressionNode } from "../../node/Node"
 import { OperatorNode } from "../../node/OperatorNode"
-import { TOKENTYPE } from "../constants"
 import { State } from "../State"
 import { parseUnary } from "./parseUnary"
 
 /**
  * percentage or mod
- * @return {Node} node
+ * @return {ExpressionNode} node
  * @private
  */
-export function parsePercentage(state: State) {
-    let node, name, fn, params
+export function parsePercentage(state: State): ExpressionNode {
+    let node, name
 
     node = parseUnary(state)
-    const token = state.Tokens.peek();
 
     const operators = {
         '%': 'mod',
-        mod: 'mod'
     }
-    while (hasOwnProperty(operators, token.Value)) {
-        fn = operators[token.Value]
+    while (hasOwnProperty(operators, state.token.Value)) {
+        name = state.token.Value
+        state.goAHead();
 
-        if (name === '%' && token.Type === TOKENTYPE.DELIMITER && token !== '(') {
+        if (name === '%' && state.isType("DELIMITER") && !state.isToken('(')) {
             // If the expression contains only %, then treat that as /100
             node = new OperatorNode('/', 'divide', [node, new ConstantNode(100)], false, true)
-        } else {
-            params = [node, parseUnary(state)]
-            node = new OperatorNode(name, fn, params)
         }
     }
 
-    return node
+    return node;
 }
