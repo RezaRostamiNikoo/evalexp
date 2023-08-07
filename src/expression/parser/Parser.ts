@@ -24,34 +24,8 @@ export class Parser {
     parseStart(expression: string) {
         const state = new State(expression);
 
-        if (state.Tokens.isEmpty()) return ""; // return a StringNode
+        if (!state.token) return expression; // return a StringNode
 
-        // link tokens together
-        state.Tokens.reduce((prev: Token, curr: Token, c: number, arr: []): any => {
-            prev.Next = curr;
-            curr.Prev = prev;
-            return curr;
-        });
-
-        const token = state.Tokens.peek();
-
-        parseBlock(state);
-
-
-
-
-        ///////////////////////////////////
-        if (token.Type === "NULL") throw new ExpressionSyntaxError(token.Value);
-        if (token.Type === "UNKNOWN") throw new ExpressionSyntaxError(token.Value);
-        if (token.Type === "NUMBER") return parseNumber(state);
-        if (token.Type === "DELIMITER") return this.parse_delimiter(state);
-        if (token.Type === "SYMBOL") return this.parse_SYmbol();
-
-        parse_Number_Delimiter(token);
+        return parseBlock(state);
     }
-
-
-
-
-
 }

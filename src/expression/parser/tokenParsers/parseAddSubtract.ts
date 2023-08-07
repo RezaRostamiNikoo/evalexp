@@ -1,5 +1,5 @@
 import { hasOwnProperty } from "../../../utils/object";
-import { ExpressionNode } from "../../node/Node"
+import { ExpressionNode } from "../../node/ExpressionNode"
 import { OperatorNode } from "../../node/OperatorNode";
 import { State } from "../State"
 import { parseMultiplyDivide } from "./parseMultiplyDivide"
@@ -19,7 +19,7 @@ export function parseAddSubtract(state: State): ExpressionNode {
         '-': 'subtract'
     }
     while (hasOwnProperty(operators, state.token.Value)) {
-        name = state.token
+        name = state.token.Value
         fn = operators[name]
 
         state.goAHead();

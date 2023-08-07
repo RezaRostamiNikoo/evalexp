@@ -1,6 +1,6 @@
 import { hasOwnProperty } from "../../../utils/object"
 import { ConstantNode } from "../../node/ConstantNode"
-import { ExpressionNode } from "../../node/Node"
+import { ExpressionNode } from "../../node/ExpressionNode"
 import { OperatorNode } from "../../node/OperatorNode"
 import { State } from "../State"
 import { parseUnary } from "./parseUnary"

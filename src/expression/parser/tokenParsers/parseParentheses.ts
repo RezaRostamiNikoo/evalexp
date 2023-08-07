@@ -1,5 +1,5 @@
 import { createSyntaxError } from "../../errors";
-import { ExpressionNode } from "../../node/Node"
+import { ExpressionNode } from "../../node/ExpressionNode"
 import { ParenthesisNode } from "../../node/ParenthesisNode";
 import { State } from "../State"
 import { parseAccessors } from "./parseAccessors";

@@ -1,5 +1,5 @@
 import { ConstantNode } from "../../node/ConstantNode";
-import { ExpressionNode } from "../../node/Node"
+import { ExpressionNode } from "../../node/ExpressionNode"
 import { State } from "../State"
 import { parseParentheses } from "./parseParentheses";
 

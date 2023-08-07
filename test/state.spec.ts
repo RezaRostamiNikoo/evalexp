@@ -5,46 +5,44 @@ describe("State", () => {
 
     test("State", () => {
 
-        const s = new State("12.005 * (x+12)/(135e3) + 12 - alignT(hamid_,jakj,12-0xde334a) > .EQ. < <= >=`");
-        const tokens = s.Tokens;
-        expect(tokens.dequeue().Value).toEqual("12.005");
-        expect(tokens.dequeue().Value).toEqual("*");
-        expect(tokens.dequeue().Value).toEqual("(");
-        expect(tokens.dequeue().Value).toEqual("x");
-        expect(tokens.dequeue().Value).toEqual("+");
-        expect(tokens.dequeue().Value).toEqual("12");
-        expect(tokens.dequeue().Value).toEqual(")");
-        expect(tokens.dequeue().Value).toEqual("/");
-        expect(tokens.dequeue().Value).toEqual("(");
-        expect(tokens.dequeue().Value).toEqual("135e-3");
-        expect(tokens.dequeue().Value).toEqual(")");
-        expect(tokens.dequeue().Value).toEqual("+");
-        expect(tokens.dequeue().Value).toEqual("12");
-        expect(tokens.dequeue().Value).toEqual("-");
-        expect(tokens.dequeue().Value).toEqual("alignT");
-        expect(tokens.dequeue().Value).toEqual("(");
-        expect(tokens.dequeue().Value).toEqual("hamid_");
-        expect(tokens.dequeue().Value).toEqual(",");
-        expect(tokens.dequeue().Value).toEqual("jakj");
-        expect(tokens.dequeue().Value).toEqual(",");
-        expect(tokens.dequeue().Value).toEqual("12");
-        expect(tokens.dequeue().Value).toEqual("-");
-        expect(tokens.dequeue().Value).toEqual("0xde334a");
-        expect(tokens.dequeue().Value).toEqual(")");
-        expect(tokens.dequeue().Value).toEqual(">");
-        expect(tokens.dequeue().Value).toEqual(".EQ.");
-        expect(tokens.dequeue().Value).toEqual("<");
-        expect(tokens.dequeue().Value).toEqual("<=");
-        expect(tokens.dequeue().Value).toEqual(">=");
+        const s = new State("12.005 * (x+12)/(135e-3) + 12 - alignT(hamid_,jakj,12-0xde334a) > .EQ. < <= >=`");
+        expect(s.token.Value).toEqual("12.005");
+        expect(s.goAHead().token.Value).toEqual("*");
+        expect(s.goAHead().token.Value).toEqual("(");
+        expect(s.goAHead().token.Value).toEqual("x");
+        expect(s.goAHead().token.Value).toEqual("+");
+        expect(s.goAHead().token.Value).toEqual("12");
+        expect(s.goAHead().token.Value).toEqual(")");
+        expect(s.goAHead().token.Value).toEqual("/");
+        expect(s.goAHead().token.Value).toEqual("(");
+        expect(s.goAHead().token.Value).toEqual("135e-3");
+        expect(s.goAHead().token.Value).toEqual(")");
+        expect(s.goAHead().token.Value).toEqual("+");
+        expect(s.goAHead().token.Value).toEqual("12");
+        expect(s.goAHead().token.Value).toEqual("-");
+        expect(s.goAHead().token.Value).toEqual("alignT");
+        expect(s.goAHead().token.Value).toEqual("(");
+        expect(s.goAHead().token.Value).toEqual("hamid_");
+        expect(s.goAHead().token.Value).toEqual(",");
+        expect(s.goAHead().token.Value).toEqual("jakj");
+        expect(s.goAHead().token.Value).toEqual(",");
+        expect(s.goAHead().token.Value).toEqual("12");
+        expect(s.goAHead().token.Value).toEqual("-");
+        expect(s.goAHead().token.Value).toEqual("0xde334a");
+        expect(s.goAHead().token.Value).toEqual(")");
+        expect(s.goAHead().token.Value).toEqual(">");
+        expect(s.goAHead().token.Value).toEqual(".EQ.");
+        expect(s.goAHead().token.Value).toEqual("<");
+        expect(s.goAHead().token.Value).toEqual("<=");
+        expect(s.goAHead().token.Value).toEqual(">=");
     });
 
     test("State", () => {
 
         const s = new State("12 + 3");
-        const tokens = s.Tokens;
-        expect(tokens.dequeue().Value).toEqual("12");
-        expect(tokens.dequeue().Value).toEqual("+");
-        expect(tokens.dequeue().Value).toEqual("3");
+        expect(s.token.Value).toEqual("12");
+        expect(s.goAHead().token.Value).toEqual("+");
+        expect(s.goAHead().token.Value).toEqual("3");
 
     });
 

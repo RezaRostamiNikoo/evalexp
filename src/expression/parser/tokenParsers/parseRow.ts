@@ -1,5 +1,5 @@
 import { ArrayNode } from "../../node/ArrayNode"
-import { ExpressionNode } from "../../node/Node";
+import { ExpressionNode } from "../../node/ExpressionNode";
 import { parseRelational } from "./parseRelational"
 
 /**

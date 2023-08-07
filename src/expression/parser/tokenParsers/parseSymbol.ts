@@ -1,11 +1,11 @@
 import { hasOwnProperty } from "../../../utils/object";
 import { ConstantNode } from "../../node/ConstantNode";
-import { ExpressionNode } from "../../node/Node"
+import { ExpressionNode } from "../../node/ExpressionNode"
 import { SymbolNode } from "../../node/SymbolNode";
 import { State } from "../State"
 import { CONSTANTS } from "../constants";
 import { parseAccessors } from "./parseAccessors";
-import { parseArray } from "./parseMatrix";
+import { parseArray } from "./parseArray";
 
 /**
   * parse symbols: functions, variables, constants, units

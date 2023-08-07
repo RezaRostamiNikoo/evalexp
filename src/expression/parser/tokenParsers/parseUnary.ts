@@ -1,5 +1,5 @@
 import { hasOwnProperty } from "../../../utils/object"
-import { ExpressionNode } from "../../node/Node"
+import { ExpressionNode } from "../../node/ExpressionNode"
 import { OperatorNode } from "../../node/OperatorNode"
 import { State } from "../State"
 import { parsePow } from "./parsePow"
@@ -20,7 +20,7 @@ export function parseUnary(state: State): ExpressionNode {
 
     if (hasOwnProperty(operators, state.token.Value)) {
         fn = operators[state.token.Value]
-        name = state.token
+        name = state.token.Value
 
         state.goAHead();
         params = [parseUnary(state)]

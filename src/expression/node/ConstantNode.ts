@@ -167,12 +167,26 @@
 //   }
 // }
 
-import { ExpressionNode } from "./Node";
+import { ExpressionNode } from "./ExpressionNode";
 
 export class ConstantNode extends ExpressionNode {
     isConstantNode: boolean = true;
-    constructor(private node: ExpressionNode) {
+    value: any;
+    /**
+     * A ConstantNode holds a constant value like a number or string.
+     *
+     * Usage:
+     *
+     *     new ConstantNode(2.3)
+     *     new ConstantNode('hello')
+     *
+     * @param {*} value    Value can be any type (number, BigNumber, string, ...)
+     * @constructor ConstantNode
+     * @extends {Node}
+     */
+    constructor(value: any) {
         super();
-
+        this.value = value
     }
+
 }

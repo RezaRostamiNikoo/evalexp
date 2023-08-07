@@ -1,4 +1,4 @@
-import { ExpressionNode } from "../../node/Node"
+import { ExpressionNode } from "../../node/ExpressionNode"
 import { OperatorNode } from "../../node/OperatorNode"
 import { State } from "../State"
 import { parseSymbol } from "./parseSymbol"

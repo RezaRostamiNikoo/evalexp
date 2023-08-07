@@ -1,5 +1,5 @@
 import { hasOwnProperty } from "../../../utils/object"
-import { ExpressionNode } from "../../node/Node"
+import { ExpressionNode } from "../../node/ExpressionNode"
 import { OperatorNode } from "../../node/OperatorNode"
 import { RelationalNode } from "../../node/RelationalNode"
 import { State } from "../State"

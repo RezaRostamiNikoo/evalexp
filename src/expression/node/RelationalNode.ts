@@ -1,4 +1,4 @@
-import { ExpressionNode } from "./Node";
+import { ExpressionNode } from "./ExpressionNode";
 
 export class RelationalNode extends ExpressionNode {
 

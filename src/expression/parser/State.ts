@@ -30,6 +30,13 @@ export class State {
             if (token) this._tokens.enqueue(token);
             else break;
         }
+        // link tokens together
+        this._tokens.reduce((prev: Token, curr: Token, c: number, arr: []): any => {
+            prev.Next = curr;
+            curr.Prev = prev;
+            return curr;
+        });
+
         return this._tokens;
     }
 
@@ -57,7 +64,7 @@ export class State {
      * it return the first token available in the queue without shifring it from the list
      * @returns {Token} returns the current token
      */
-    get token(): Token { return this.getTokens().peek(); }
+    get token(): Token { return this.getTokens().peek() || new Token("", "NULL", this._level); }
 
     /**
      * It shifts the current token from the queue and next toke is ready to be proccessed on

@@ -4,9 +4,10 @@ import { AccessorNode } from "../../node/AccessorNode";
 import { ConstantNode } from "../../node/ConstantNode";
 import { FunctionNode } from "../../node/FunctionNode";
 import { IndexNode } from "../../node/IndexNode";
-import { ExpressionNode } from "../../node/Node"
+import { ExpressionNode } from "../../node/ExpressionNode"
 import { State } from "../State"
 import { parseRelational } from "./parseRelational"
+import { SymbolNode } from "../../node/SymbolNode";
 
 /**
  * parse accessors:
@@ -52,7 +53,7 @@ export function parseAccessors(state: State, node: ExpressionNode, types?: Array
                 state.prevLevel() // for items
                 state.goAHead()
 
-                node = new FunctionNode(node, params)
+                node = new FunctionNode(node as unknown as SymbolNode, params)
             } else {
                 // implicit multiplication like (2+3)(4+5) or this.sqrt(2)(1+2)
                 // don't parse it here but let it be handled by parseImplicitMultiplication

@@ -1,5 +1,5 @@
 import { rule2Node } from "../../../utils/is"
-import { ExpressionNode } from "../../node/Node"
+import { ExpressionNode } from "../../node/ExpressionNode"
 import { OperatorNode } from "../../node/OperatorNode"
 import { State } from "../State"
 import { parsePercentage } from "./parsePercentage"
@@ -16,19 +16,16 @@ import { parsePercentage } from "./parsePercentage"
 export function parseRule2(state: State): ExpressionNode {
     let node = parsePercentage(state)
     let last = node
-    const tokenStates = []
 
     while (true) {
         // Match the "number /" part of the pattern "number / number symbol"
         if (state.isToken('/') && rule2Node(last)) {
             // Look ahead to see if the next token is a number
-            tokenStates.push(Object.assign({}, state))
             state.goAHead();
 
             // Match the "number / number" part of the pattern
             if (state.isType("NUMBER")) {
                 // Look ahead again
-                tokenStates.push(Object.assign({}, state))
                 state.goAHead();
 
                 // Match the "symbol" part of the pattern, or a left parenthesis

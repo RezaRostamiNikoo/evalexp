@@ -385,6 +385,6 @@
 
 
 
-export class ExpressionNode {
-
+export abstract class ExpressionNode {
+    isNode: boolean = true;
 }

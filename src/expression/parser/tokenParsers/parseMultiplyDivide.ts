@@ -1,5 +1,5 @@
 import { hasOwnProperty } from "../../../utils/object"
-import { ExpressionNode } from "../../node/Node"
+import { ExpressionNode } from "../../node/ExpressionNode"
 import { OperatorNode } from "../../node/OperatorNode"
 import { State } from "../State"
 import { parseImplicitMultiplication } from "./parseImplicitMultiplication"
@@ -25,7 +25,7 @@ export function parseMultiplyDivide(state: State): ExpressionNode {
     while (true) {
         if (hasOwnProperty(operators, state.token.Value)) {
             // explicit operators
-            name = state.token
+            name = state.token.Value
             fn = operators[name]
 
             state.goAHead();
