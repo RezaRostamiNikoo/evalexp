@@ -1,8 +1,8 @@
-import { rule2Node } from "../../../utils/is"
-import { ExpressionNode } from "../../node/ExpressionNode"
-import { OperatorNode } from "../../node/OperatorNode"
-import { State } from "../State"
-import { parsePercentage } from "./parsePercentage"
+import { rule2Node } from "../../../utils/is";
+import { ExpressionNode } from "../../node/ExpressionNode";
+import { OperatorNode } from "../../node/OperatorNode";
+import { State } from "../State";
+import { parsePercentage } from "./parsePercentage";
 
 /**
  * Infamous "rule 2" as described in https://github.com/josdejong/mathjs/issues/792#issuecomment-361065370
@@ -40,7 +40,10 @@ export function parseRule2(state: State): ExpressionNode {
                     state.rewind().rewind(); // two times to get to the "/" delimiter again 
                     break;
                 }
-            } else break;
+            } else {
+                state.rewind();
+                break;
+            }
         } else {
             break
         }

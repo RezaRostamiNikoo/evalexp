@@ -214,3 +214,11 @@ export function typeOf(x: any) {
 
     return t // can be 'string', 'number', 'boolean', 'function', 'bigint', ...
 }
+
+export function isReliableNodeForUnary(x: any): boolean {
+    return isAccessorNode(x) ||
+        isConstantNode(x) ||
+        isFunctionNode(x) ||
+        isParenthesisNode(x) ||
+        isSymbolNode(x)
+}

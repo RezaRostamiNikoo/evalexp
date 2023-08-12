@@ -8,7 +8,7 @@ import { StringChar } from "../../utils/StringChar";
 
 export class Expression {
     private text: StringChar;
-
+    private lastToken: Token;
     constructor(expression: string) {
         if (!expression) throw new EmptyExpressionError()
         this.text = new StringChar(expression);
@@ -20,6 +20,16 @@ export class Expression {
      * @private
      */
     getNextToken(): Token {
+        const result = this.calculateNextToken();
+        if (this.lastToken && result.Value) {
+            this.lastToken.Next = result;
+            result.Prev = this.lastToken;
+        }
+        this.lastToken = result;
+        return result;
+    }
+
+    private calculateNextToken(): Token {
         const result = new Token('', "NULL");
         this.text.skipIgnoredCharacters();
         if (this.isEnd(result)) return result;
@@ -33,8 +43,7 @@ export class Expression {
         while (!this.text.currentIs('')) {
             this.appendCurrent(result);
         }
-        return undefined;
-        throw new ExpressionSyntaxError(result.Value)
+        return result;
     }
 
     /**

@@ -27,16 +27,9 @@ export class State {
         this._tokens = new Queue();
         while (true) {
             const token = this._expression.getNextToken();
-            if (token) this._tokens.enqueue(token);
+            if (token.Value) this._tokens.enqueue(token);
             else break;
         }
-        // link tokens together
-        this._tokens.reduce((prev: Token, curr: Token, c: number, arr: []): any => {
-            prev.Next = curr;
-            curr.Prev = prev;
-            return curr;
-        });
-
         return this._tokens;
     }
 
