@@ -1,4 +1,4 @@
-import { isInteger } from '../number.js'
+import { isInteger } from '../number'
 
 /**
  * Formats a BigNumber in a given base

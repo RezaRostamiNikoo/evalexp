@@ -2,6 +2,24 @@ import { IndexNode } from "./IndexNode";
 import { ExpressionNode } from "./ExpressionNode";
 import { isIndexNode, isNode } from "../../utils/is";
 
+
+// const access = accessFactory({ subset })
+
+// /**
+//  * Are parenthesis needed?
+//  * @private
+//  */
+// function needParenthesis(node) {
+//     // TODO: maybe make a method on the nodes which tells whether they need parenthesis?
+//     return !(
+//         isAccessorNode(node) ||
+//         isArrayNode(node) ||
+//         isConstantNode(node) ||
+//         isFunctionNode(node) ||
+//         isObjectNode(node) ||
+//         isParenthesisNode(node) ||
+//         isSymbolNode(node))
+// }
 export class AccessorNode extends ExpressionNode {
     isAccessorNode: boolean = true;
     object: ExpressionNode; // TODO: it should be an object if it can be defined in a expression but it can be a symbolNode because it shoud be defined in scope
@@ -27,5 +45,7 @@ export class AccessorNode extends ExpressionNode {
 
         this.object = object
         this.index = index
+
+
     }
 }
