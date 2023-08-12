@@ -17,9 +17,9 @@ export function parseMultiplyDivide(state: State): ExpressionNode {
 
     const operators = {
         '*': 'multiply',
-        '.*': 'dotMultiply',
+        // '.*': 'dotMultiply',
         '/': 'divide',
-        './': 'dotDivide'
+        // './': 'dotDivide'
     }
 
     while (true) {

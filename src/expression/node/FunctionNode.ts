@@ -31,4 +31,8 @@ export class FunctionNode extends ExpressionNode {
         this.fn = fn
         this.args = args || []
     }
+
+    toString(): string {
+        return `${this.fn}(${this.args.map(a => a.toString()).join(", ")})`;
+    }
 }

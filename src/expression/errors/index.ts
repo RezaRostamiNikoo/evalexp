@@ -12,9 +12,10 @@ export * from "./ExpressionRuntimeError";
  * @private
  */
 export function createSyntaxError(state: State, message: string) {
-    const c = this.col();
-    const error = new SyntaxError(message + ' (char ' + c + ')');
-    (error as any).char = c;
+    // const c = this.col();
+    // const error = new SyntaxError(message + ' (char ' + c + ')');
+    // (error as any).char = c;
+    const error = new SyntaxError(message + ' (char ' + "c" + ')');
 
     return error;
 }
@@ -26,9 +27,10 @@ export function createSyntaxError(state: State, message: string) {
  * @private
  */
 export function createError(message: string) {
-    const c = this.col();
-    const error = new SyntaxError(message + ' (char ' + c + ')');
-    (error as any).char = c;
+    // const c = this.col();
+    // const error = new SyntaxError(message + ' (char ' + c + ')');
+    // (error as any).char = c;
+    const error = new SyntaxError(message + ' (char ' + "c" + ')');
 
     return error;
 }

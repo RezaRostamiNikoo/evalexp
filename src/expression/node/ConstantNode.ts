@@ -189,4 +189,8 @@ export class ConstantNode extends ExpressionNode {
         this.value = value
     }
 
+
+
+    toString(): string { return this.value; }
+
 }

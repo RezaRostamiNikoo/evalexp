@@ -387,4 +387,13 @@
 
 export abstract class ExpressionNode {
     isNode: boolean = true;
+
+
+
+
+
+    toString(): string {
+        throw new Error("tostring method should be defined");
+
+    }
 }

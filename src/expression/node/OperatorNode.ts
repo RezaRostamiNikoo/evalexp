@@ -41,4 +41,12 @@ export class OperatorNode extends ExpressionNode {
         this.args = args || []
     }
 
+
+
+    toString(): string {
+        if (["unaryPlus", "unaryMinus"].includes(this.fn))
+            return `${this.op}${this.args[0].toString()}`
+
+        return `${this.args[0].toString()} ${this.op} ${this.args[1].toString()}`;
+    }
 }
