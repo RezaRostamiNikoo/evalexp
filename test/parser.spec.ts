@@ -57,13 +57,10 @@ describe("Testing the Parser", () => {
 
 
     test("complex", () => {
-        // const expr = "2^-3 * -sin(12(23/2x)) * -hamid.reza fn(12/5(sin(0)),-45.35,-heded[1])";
-        // expect(new Parser().parseStart(expr).toString())
-        //     .toEqual("2 ^ -3 * -sin(12 * (23 / (2 * x))) * -hamid.reza fn(12 / (5 * (sin(0))),-45.35,-heded[1])")
-
-        const expr = "12/2x";
+        const expr = "2^-3 * -sin(12(23/2x)) * -hamid.reza fn(12/5(sin(0)),-45.35,-heded[1])";
         expect(new Parser().parseStart(expr).toString())
-            .toEqual("12 / (2 * x)");
+            .toEqual("2 ^ -3 * -sin((12 * (23 / (2 * x)))) * (-hamid.reza * fn(12 / (5 * (sin(0))), -45.35, -heded[1]))")
+
 
 
     });
