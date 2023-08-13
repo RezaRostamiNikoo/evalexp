@@ -162,7 +162,11 @@ export class OperatorNode extends ExpressionNode {
         if (["unaryPlus", "unaryMinus"].includes(this.fn))
             return `${this.op}${this.args[0].toString()}`
 
-        return `${this.args[0].toString()} ${this.op} ${this.args[1].toString()}`;
+        const result = `${this.args[0].toString()} ${this.op} ${this.args[1].toString()}`;
+        if (this.implicit) {
+            return `(${result})`
+        }
+        return result;
     }
 
     /**

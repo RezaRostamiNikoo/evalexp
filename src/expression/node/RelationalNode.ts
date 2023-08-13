@@ -1,5 +1,5 @@
+import { Stack } from "../../utils/Stack";
 import { getSafeProperty } from "../../utils/customs";
-import { getPrecedence } from "../parser/operators";
 import { ExpressionNode } from "./ExpressionNode";
 
 const operatorMap = {
@@ -41,6 +41,7 @@ export class RelationalNode extends ExpressionNode {
         }
         this.conditionals = conditionals
         this.params = params
+
     }
 
 
@@ -114,27 +115,14 @@ export class RelationalNode extends ExpressionNode {
      * @return {string} str
      */
     _toString(options) {
-        const parenthesis =
-            (options && options.parenthesis) ? options.parenthesis : 'keep'
-        const precedence =
-            getPrecedence(this, parenthesis, options && options.implicit)
-
-        const paramStrings = this.params.map(function (p, index) {
-            const paramPrecedence =
-                getPrecedence(p, parenthesis, options && options.implicit)
-            return (parenthesis === 'all' ||
-                (paramPrecedence !== null && paramPrecedence <= precedence))
-                ? '(' + p.toString(options) + ')'
-                : p.toString(options)
-        })
-
-        let ret = paramStrings[0]
-        for (let i = 0; i < this.conditionals.length; i++) {
-            ret += ' ' + operatorMap[this.conditionals[i]]
-            ret += ' ' + paramStrings[i + 1]
+        const p = new Stack<ExpressionNode>(...this.params);
+        const c = new Stack<string>(...this.conditionals);
+        let result = `${p.pop().evaluate()}`;
+        while (c.peek()) {
+            result += ` ${c.pop()} `;
+            result += `${p.pop()}`;
         }
-
-        return ret
+        return result;
     }
 
     /**

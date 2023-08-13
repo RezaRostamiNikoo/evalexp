@@ -30,7 +30,7 @@ export function parseParentheses(state: State): ExpressionNode {
 
         node = new ParenthesisNode(node)
         node = parseAccessors(state, node)
-        return node
+        return node;
     }
 
     return parseEnd(state)

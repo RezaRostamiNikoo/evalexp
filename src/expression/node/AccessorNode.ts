@@ -1,6 +1,7 @@
 import { IndexNode } from "./IndexNode";
 import { ExpressionNode } from "./ExpressionNode";
 import { isIndexNode, isNode } from "../../utils/is";
+import { getSafeProperty } from "../../utils/customs";
 
 
 // const access = accessFactory({ subset })
@@ -21,10 +22,21 @@ import { isIndexNode, isNode } from "../../utils/is";
 //         isSymbolNode(node))
 // }
 export class AccessorNode extends ExpressionNode {
-    isAccessorNode: boolean = true;
+    _name: string = "AccessorNode";
     object: ExpressionNode; // TODO: it should be an object if it can be defined in a expression but it can be a symbolNode because it shoud be defined in scope
     index: IndexNode;
-
+    get type() { return this._name }
+    get isAccessorNode(): boolean { return true }
+    // readonly property name
+    get name() {
+        if (this.index) {
+            return (this.index.isObjectProperty())
+                ? this.index.getObjectProperty()
+                : ''
+        } else {
+            return this.object._name || ''
+        }
+    }
     /**
      * @constructor AccessorNode
      * @extends {ExpressionNode}
@@ -45,7 +57,92 @@ export class AccessorNode extends ExpressionNode {
 
         this.object = object
         this.index = index
+    }
 
 
+
+
+    /**
+     * Compile a node into a JavaScript function.
+     * This basically pre-calculates as much as possible and only leaves open
+     * calculations which depend on a dynamic scope with variables.
+     * @param {Object} math     Math.js namespace with functions and constants.
+     * @param {Object} argNames An object with argument names as key and `true`
+     *                          as value. Used in the SymbolNode to optimize
+     *                          for arguments from user assigned functions
+     *                          (see FunctionAssignmentNode) or special symbols
+     *                          like `end` (see IndexNode).
+     * @return {function} Returns a function which can be called like:
+     *                        evalNode(scope: Object, args: Object, context: *)
+     */
+    _compile(math, argNames) {
+        const evalObject = this.object._compile(math, argNames)
+        const evalIndex = this.index._compile(math, argNames)
+
+        if (this.index.isObjectProperty()) {
+            const prop = this.index.getObjectProperty()
+            return function evalAccessorNode(scope, args, context) {
+                // get a property from an object evaluated using the scope.
+                return getSafeProperty(evalObject(scope, args, context), prop)
+            }
+        } else {
+            return function evalAccessorNode(scope, args, context) {
+                const object = evalObject(scope, args, context)
+                // we pass just object here instead of context:
+                const index = evalIndex(scope, args, object)
+                return "access(object, index)"
+            }
+        }
+    }
+
+    /**
+     * Execute a callback for each of the child nodes of this node
+     * @param {function(child: Node, path: string, parent: Node)} callback
+     */
+    forEach(callback) {
+        callback(this.object, 'object', this)
+        callback(this.index, 'index', this)
+    }
+
+    /**
+     * Create a new AccessorNode whose children are the results of calling
+     * the provided callback function for each child of the original node.
+     * @param {function(child: Node, path: string, parent: Node): Node} callback
+     * @returns {AccessorNode} Returns a transformed copy of the node
+     */
+    map(callback) {
+        return new AccessorNode(
+            this._ifNode(callback(this.object, 'object', this)),
+            this._ifNode(callback(this.index, 'index', this))
+        )
+    }
+
+    /**
+     * Create a clone of this node, a shallow copy
+     * @return {AccessorNode}
+     */
+    clone() {
+        return new AccessorNode(this.object, this.index)
+    }
+
+    /**
+     * Get string representation
+     * @param {Object} options
+     * @return {string}
+     */
+    _toString(options) {
+        return `${this.object.toString(options)}${this.index.toString(options)}`;
+    }
+
+    /**
+     * Instantiate an AccessorNode from its JSON representation
+     * @param {Object} json
+     *     An object structured like
+     *     `{"mathjs": "AccessorNode", object: ..., index: ...}`,
+     *     where mathjs is optional
+     * @returns {AccessorNode}
+     */
+    static fromJSON(json) {
+        return new AccessorNode(json.object, json.index)
     }
 }

@@ -21,18 +21,18 @@ function _validateScope(scope) {
 
 
 export abstract class ExpressionNode {
+    _name: string = "ExpressionNode";
     get type() { return 'Node' }
     get isNode() { return true }
 
     value: string;
-
 
     /**
      * Evaluate the node
      * @param {Object} [scope]  Scope to read/write variables
      * @return {*}              Returns the result
      */
-    evaluate(scope) {
+    evaluate(scope: Object = {}): any {
         return this.compile().evaluate(scope)
     }
 
@@ -50,9 +50,9 @@ export abstract class ExpressionNode {
         const context = null
 
         function evaluate(scope) {
-            const s = createMap(scope)
-            _validateScope(s)
-            return expr(s, args, context)
+            const s = createMap(scope);
+            _validateScope(s);
+            return expr(s, args, context);
         }
 
         return {

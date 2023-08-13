@@ -89,7 +89,7 @@ export function parseAccessors(state: State, node: ExpressionNode, types?: Array
             if (!state.isType("SYMBOL")) {
                 throw createSyntaxError(state, 'Property name expected after dot')
             }
-            params.push(new ConstantNode(state.token))
+            params.push(new ConstantNode(state.token.Value))
             state.goAHead();
 
             const dotNotation = true

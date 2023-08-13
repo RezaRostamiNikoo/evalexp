@@ -43,7 +43,7 @@ export class ConstantNode extends ExpressionNode {
         const value = this.value
 
         return function evalConstantNode() {
-            return value
+            return parseFloat(value);
         }
     }
 

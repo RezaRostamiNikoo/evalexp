@@ -9,22 +9,20 @@
 import { State } from "./State";
 
 import { parseBlock } from "./tokenParsers/blockParser";
-import { Token } from "./Token";
-import { ExpressionSyntaxError } from "../errors";
-import { parseNumber } from "./tokenParsers/parseNumber";
+import { ExpressionNode } from "../node/ExpressionNode";
 
 export class Parser {
     private state: State;
 
     /**
      * Start of the parse levels below, in order of precedence
-     * @return {Node} node
+     * @return {ExpressionNode} node
      * @private
      */
-    parseStart(expression: string) {
+    parseStart(expression: string): ExpressionNode {
         const state = new State(expression);
 
-        if (!state.token) return expression; // return a StringNode
+        if (!state.token.Value) throw new Error("there is no token");
 
         return parseBlock(state);
     }

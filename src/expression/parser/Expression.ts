@@ -32,11 +32,26 @@ export class Expression {
     private calculateNextToken(): Token {
         const result = new Token('', "NULL");
         this.text.skipIgnoredCharacters();
-        if (this.isEnd(result)) return result;
-        if (this.isDelimiter(result)) return result;
-        if (this.is_bi_oct_hex(result)) return result;
-        if (this.isNumber(result)) return result;
-        if (this.is_variable_function_namedOperator(result)) return result;
+        if (this.isEnd(result)) {
+            result.head = this.text.head - result.Value.length;
+            return result;
+        }
+        if (this.isDelimiter(result)) {
+            result.head = this.text.head - result.Value.length;
+            return result;
+        }
+        if (this.is_bi_oct_hex(result)) {
+            result.head = this.text.head - result.Value.length;
+            return result;
+        }
+        if (this.isNumber(result)) {
+            result.head = this.text.head - result.Value.length;
+            return result;
+        }
+        if (this.is_variable_function_namedOperator(result)) {
+            result.head = this.text.head - result.Value.length;
+            return result;
+        }
 
         // something unknown is found, wrong characters -> a syntax error
         result.setType("UNKNOWN");
@@ -128,11 +143,10 @@ export class Expression {
             // get number, can have a single dot
             if (this.text.currentIs('.')) {
                 this.appendCurrent(token);
-
                 if (!this.text.isDigit()) {
                     // this is no number, it is just a dot (can be dot notation)
                     token.setType("DELIMITER");
-                    return false;
+                    return true;
                 }
             } else {
                 this.appendAllDigits(token);
@@ -183,6 +197,10 @@ export class Expression {
     }
 
 
+
+    getErrorOnHead(token: Token): string {
+        return this.text.getErrorOnHead(token.Value.length, token.head);
+    }
 
 
 }

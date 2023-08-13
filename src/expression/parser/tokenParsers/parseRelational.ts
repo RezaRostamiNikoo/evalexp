@@ -31,9 +31,9 @@ export function parseRelational(state: State): ExpressionNode {
         '>=': 'largerEq',
     }
 
-    while (hasOwnProperty(operators, token.Value)) { // eslint-disable-line no-unmodified-loop-condition
-        const cond = { name: token, fn: operators[token.Value] }
-        conditionals.push(cond)
+    while (hasOwnProperty(operators, state.token.Value)) { // eslint-disable-line no-unmodified-loop-condition
+        conditionals.push({ name: token.Value, fn: operators[token.Value] })
+        state.goAHead();
         params.push(parseAddSubtract(state))
     }
 

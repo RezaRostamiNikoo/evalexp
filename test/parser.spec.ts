@@ -1,4 +1,4 @@
-import { Parser } from "../src/expression/parser/Parser";
+import { Parser } from "../src/expression/parser";
 
 
 describe("Testing the Parser", () => {
@@ -43,4 +43,28 @@ describe("Testing the Parser", () => {
         expect(new Parser().parseStart("[1,2,3]").toString()).toEqual("[1, 2, 3]")
         expect(new Parser().parseStart("[hamid(),5^3,24/6]").toString()).toEqual("[hamid(), 5 ^ 3, 24 / 6]")
     })
+
+    test("Rational", () => {
+        expect(new Parser().parseStart("3 .EQ. 5").toString()).toEqual("3 .EQ. 5")
+        expect(new Parser().parseStart("hamid.EQ.5").toString()).toEqual("hamid .EQ. 5")
+        // expect(new Parser().parseStart("3.EQ. 5").toString()).toEqual("3 .EQ. 5")
+    });
+
+    test("Accessor", () => {
+        expect(new Parser().parseStart("hamid  .  reza  .  f").toString()).toEqual("hamid.reza.f")
+        expect(new Parser().parseStart("  hamid  [  reza  ]   [  f   ]  ").toString()).toEqual("hamid[reza][f]")
+    });
+
+
+    test("complex", () => {
+        // const expr = "2^-3 * -sin(12(23/2x)) * -hamid.reza fn(12/5(sin(0)),-45.35,-heded[1])";
+        // expect(new Parser().parseStart(expr).toString())
+        //     .toEqual("2 ^ -3 * -sin(12 * (23 / (2 * x))) * -hamid.reza fn(12 / (5 * (sin(0))),-45.35,-heded[1])")
+
+        const expr = "12/2x";
+        expect(new Parser().parseStart(expr).toString())
+            .toEqual("12 / (2 * x)");
+
+
+    });
 });

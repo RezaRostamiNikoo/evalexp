@@ -6,7 +6,8 @@ export class Token {
     private _level: number = 0;
     private next: Token;
     private prev: Token;
-    private parent: Token;
+    private _head: number = 0;
+
 
     constructor(initValue: string, initType: TokenType, level: number = 0) {
         this._value = initValue;
@@ -32,6 +33,8 @@ export class Token {
         this._type = tokenType;
     }
 
+    get head(): number { return this._head; }
+    set head(value: number) { this._head = value; }
     /**
      * return token
      * @returns {string} returns the current token
@@ -78,4 +81,7 @@ export class Token {
 
     get Next() { return this.next; }
     get Prev() { return this.prev; }
+
+
+
 }

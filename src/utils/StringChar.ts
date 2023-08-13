@@ -10,6 +10,10 @@ export class StringChar {
         this._text = text;
     }
 
+    get head(): number {
+        return this._head;
+    }
+
     /**
      * Get the next character from the expression.
      * The character is stored into the char c. If the end of the expression is
@@ -136,4 +140,17 @@ export class StringChar {
         this.incrementIndex(chars);
         return result;
     }
+
+
+    getErrorOnHead(chars: number, head: number): string {
+        const result = [];
+        result.push(this._text);
+        let signText = "";
+        for (let i = 0; i < head; i++) signText += " ";
+        for (let i = 0; i < chars; i++) signText += "^";
+        result.push(signText);
+        return result.join('\n');
+    }
+
+
 }
