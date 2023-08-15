@@ -1,4 +1,5 @@
-import { getSafeProperty } from "../../utils/customs";
+import { getSafePropertyFromComplexObject } from "../../utils/customs";
+import { Scope } from "../parser/Scope";
 import { ExpressionNode } from "./ExpressionNode";
 import { OperatorNode } from "./OperatorNode";
 
@@ -32,7 +33,7 @@ export class SymbolNode extends ExpressionNode {
      * Compile a node into a JavaScript function.
      * This basically pre-calculates as much as possible and only leaves open
      * calculations which depend on a dynamic scope with variables.
-     * @param {Object} math     Math.js namespace with functions and constants.
+     * @param {Object} scope     Math.js namespace with functions and constants.
      * @param {Object} argNames An object with argument names as key and `true`
      *                          as value. Used in the SymbolNode to optimize
      *                          for arguments from user assigned functions
@@ -41,27 +42,25 @@ export class SymbolNode extends ExpressionNode {
      * @return {function} Returns a function which can be called like:
      *                        evalNode(scope: Object, args: Object, context: *)
      */
-    _compile(math, argNames) {
+    _compile(math, argNames): Function {
+        const _this = this
         const name = this.name
 
-        if (argNames[name] === true) {
-            // this is a FunctionAssignment argument
-            // (like an x when inside the expression of a function
-            // assignment `f(x) = ...`)
+        if (name in math) {
             return function (scope, args, context) {
-                return getSafeProperty(args, name)
-            }
-        } else if (name in math) {
-            return function (scope, args, context) {
-                return scope.has(name)
-                    ? scope.get(name)
-                    : getSafeProperty(math, name)
+                // try {
+
+                return scope.has(name) ? _this.checkValueToParse(scope.get(name)) : getSafePropertyFromComplexObject(math, name)
+                // } catch { return name; }
             }
         } else {
+
             return function (scope, args, context) {
-                return scope.has(name)
-                    ? scope.get(name)
-                    : SymbolNode.onUndefinedSymbol(name)
+                try {
+                    return scope.has(name) ? _this.checkValueToParse(scope.get(name)) : SymbolNode.onUndefinedSymbol(name);
+                } catch {
+                    return name;
+                }
             }
         }
     }

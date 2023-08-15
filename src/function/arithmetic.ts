@@ -3,7 +3,7 @@ export const sqrt = Math.sqrt;
 export const cbrt = Math.cbrt;
 export const pow = Math.pow;
 export const multiply = (x: number, y: number): number => x * y;
-export const devide = (x: number, y: number): number => x / y;
+export const divide = (x: number, y: number): number => x / y;
 export const add = (x: number, y: number): number => x + y;
 export const abs = Math.abs;
 export const ceil = Math.ceil;

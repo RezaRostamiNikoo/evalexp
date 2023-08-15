@@ -1,4 +1,4 @@
-import { getSafeMethod, getSafeProperty } from "../../utils/customs";
+import { getSafeMethod, getSafeProperty, getSafePropertyFromComplexObject } from "../../utils/customs";
 import { isAccessorNode, isFunctionAssignmentNode, isIndexNode, isNode, isSymbolNode } from "../../utils/is";
 import { hasOwnProperty } from "../../utils/object";
 import { createSubScope } from "../../utils/scope";
@@ -138,7 +138,7 @@ export class FunctionNode extends ExpressionNode {
             if (!argNames[name]) {
                 // we can statically determine whether the function
                 // has the rawArgs property
-                const fn = name in math ? getSafeProperty(math, name) : undefined
+                const fn = name in math ? getSafePropertyFromComplexObject(math, name) : undefined
                 const isRaw = typeof fn === 'function' && fn.rawArgs === true
 
                 const resolveFn = (scope) => {
@@ -146,7 +146,7 @@ export class FunctionNode extends ExpressionNode {
                     if (scope.has(name)) {
                         value = scope.get(name)
                     } else if (name in math) {
-                        value = getSafeProperty(math, name)
+                        value = getSafePropertyFromComplexObject(math, name)
                     } else {
                         return FunctionNode.onUndefinedFunction(name)
                     }
@@ -288,13 +288,13 @@ export class FunctionNode extends ExpressionNode {
      * @param {function(child: Node, path: string, parent: Node): Node} callback
      * @returns {FunctionNode} Returns a transformed copy of the node
      */
-    map(callback) {
+    map(callback: (child: ExpressionNode, path: string, parent: ExpressionNode) => ExpressionNode): FunctionNode {
         const fn = this._ifNode(callback(this.fn, 'fn', this))
         const args = []
         for (let i = 0; i < this.args.length; i++) {
             args[i] = this._ifNode(callback(this.args[i], 'args[' + i + ']', this))
         }
-        return new FunctionNode(fn, args)
+        return new FunctionNode(fn, args);;
     }
 
     /**

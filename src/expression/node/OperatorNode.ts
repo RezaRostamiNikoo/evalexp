@@ -1,5 +1,5 @@
 import { map } from "../../utils/array";
-import { getSafeProperty, isSafeMethod } from "../../utils/customs";
+import { getSafeProperty, getSafePropertyFromComplexObject, isSafeMethod } from "../../utils/customs";
 import { isNode } from "../../utils/is";
 import { ExpressionNode } from "./ExpressionNode";
 
@@ -64,6 +64,7 @@ export class OperatorNode extends ExpressionNode {
     _compile(math, argNames) {
         // validate fn
         if (typeof this.fn !== 'string' || !isSafeMethod(math, this.fn)) {
+            console.log("asdasdasdasdasdasdasdasdasd")
             if (!math[this.fn]) {
                 throw new Error(
                     'Function ' + this.fn + ' missing in provided namespace "math"')
@@ -72,7 +73,7 @@ export class OperatorNode extends ExpressionNode {
             }
         }
 
-        const fn = getSafeProperty(math, this.fn)
+        const fn = getSafePropertyFromComplexObject(math, this.fn)
         const evalArgs = map(this.args, function (arg) {
             return arg._compile(math, argNames)
         })

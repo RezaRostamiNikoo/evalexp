@@ -3,6 +3,8 @@ import { createMap } from "../../utils/map";
 import { deepStrictEqual } from "../../utils/object";
 import { keywords } from "../keywords";
 import * as functions from "../../function";
+import { parse } from "../parser";
+import { Scope } from "../parser/Scope";
 
 
 /**
@@ -10,7 +12,7 @@ import * as functions from "../../function";
  * Throws an error when the scope contains an illegal symbol.
  * @param {Object} scope
  */
-function _validateScope(scope) {
+function _validateScope(scope: Scope) {
     for (const symbol of [...Array.from(keywords)]) {
         if (scope.has(symbol)) {
             throw new Error('Scope contains an illegal symbol, "' + symbol + '" is a reserved keyword')
@@ -21,6 +23,7 @@ function _validateScope(scope) {
 
 
 export abstract class ExpressionNode {
+    private _scope: Scope;
     _name: string = "ExpressionNode";
     get type() { return 'Node' }
     get isNode() { return true }
@@ -29,11 +32,12 @@ export abstract class ExpressionNode {
 
     /**
      * Evaluate the node
-     * @param {Object} [scope]  Scope to read/write variables
+     * @param {Scope} [scope]  Scope to read/write variables
      * @return {*}              Returns the result
      */
-    evaluate(scope: Object = {}): any {
-        return this.compile().evaluate(scope)
+    evaluate(scope: Scope = new Scope()): any {
+        this._scope = scope;
+        return this.compile().evaluate(scope);
     }
 
     /**
@@ -49,10 +53,9 @@ export abstract class ExpressionNode {
         const args = {}
         const context = null
 
-        function evaluate(scope) {
-            const s = createMap(scope);
-            _validateScope(s);
-            return expr(s, args, context);
+        function evaluate(scope: Scope) {
+            _validateScope(scope);
+            return expr(scope, args, context);
         }
 
         return {
@@ -93,7 +96,7 @@ export abstract class ExpressionNode {
      * @param {function(child: Node, path: string, parent: Node): Node} callback
      * @returns {OperatorNode} Returns a transformed copy of the node
      */
-    map(callback: (child: ExpressionNode, path: string, parent: ExpressionNode) => ExpressionNode): any {
+    map(callback: (child: ExpressionNode, path: string, parent: ExpressionNode) => ExpressionNode): ExpressionNode {
         // must be implemented by each of the Node implementations
         throw new Error('Cannot run map on a Node interface')
     }
@@ -309,4 +312,9 @@ export abstract class ExpressionNode {
         return this;
     }
 
+
+    protected checkValueToParse(value: string): any {
+        if (typeof value === "string") return parse(value).evaluate(this._scope);
+        return value;
+    }
 }

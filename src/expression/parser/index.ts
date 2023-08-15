@@ -1,2 +1,2 @@
-export * from "./Parser";
+export * from "./parse";
 export * from "./State";

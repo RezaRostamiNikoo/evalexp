@@ -20,7 +20,17 @@ function getSafeProperty(object: Object, prop: string) {
 
   throw new Error('No access to property "' + prop + '"')
 }
+function getSafePropertyFromComplexObject(object: Object, prop: string) {
+  if (isSafeProperty(object, prop)) {
+    return (object as any)[prop]
+  }
 
+  if (typeof (object as any)[prop] === 'function' && isSafeMethod(object, prop)) {
+    throw new Error('Cannot access method "' + prop + '" as a property')
+  }
+
+  throw new Error('No access to property "' + prop + '"')
+}
 /**
  * Set a property on a plain object.
  * Throws an error in case the object is not a plain object or the
@@ -109,6 +119,8 @@ function isSafeMethod(object: Object, method: string) {
   if (object === null || object === undefined || typeof (object as any)[method] !== 'function') {
     return false
   }
+
+
   // UNSAFE: ghosted
   // e.g overridden toString
   // Note that IE10 doesn't support __proto__ and we can't do this check there.
@@ -116,6 +128,7 @@ function isSafeMethod(object: Object, method: string) {
     (Object.getPrototypeOf && (method in Object.getPrototypeOf(object)))) {
     return false
   }
+
   // SAFE: whitelisted
   // e.g toString
   if (hasOwnProperty(safeNativeMethods as unknown as Object, method)) {
@@ -129,6 +142,7 @@ function isSafeMethod(object: Object, method: string) {
     // here because Object.prototype is a root object
     return false
   }
+
   // UNSAFE: inherited from Function prototype
   // e.g call, apply
   if (method in Function.prototype) {
@@ -137,6 +151,7 @@ function isSafeMethod(object: Object, method: string) {
     // here because Function.prototype is a root object
     return false
   }
+
   return true
 }
 
@@ -156,6 +171,7 @@ const safeNativeMethods = {
 }
 
 export { getSafeProperty }
+export { getSafePropertyFromComplexObject }
 export { setSafeProperty }
 export { isSafeProperty }
 export { hasSafeProperty }

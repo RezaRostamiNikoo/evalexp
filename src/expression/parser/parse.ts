@@ -11,19 +11,15 @@ import { State } from "./State";
 import { parseBlock } from "./tokenParsers/blockParser";
 import { ExpressionNode } from "../node/ExpressionNode";
 
-export class Parser {
-    private state: State;
+/**
+ * Start of the parse levels below, in order of precedence
+ * @return {ExpressionNode} node
+ * @private
+ */
+export function parse(expression: string, scope: Object = {}): ExpressionNode {
+    const state = new State(expression);
 
-    /**
-     * Start of the parse levels below, in order of precedence
-     * @return {ExpressionNode} node
-     * @private
-     */
-    parseStart(expression: string): ExpressionNode {
-        const state = new State(expression);
+    if (!state.token.Value) throw new Error("there is no token");
 
-        if (!state.token.Value) throw new Error("there is no token");
-
-        return parseBlock(state);
-    }
+    return parseBlock(state);
 }
