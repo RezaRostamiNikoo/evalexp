@@ -9,9 +9,6 @@
 import { State } from "./State";
 
 import { parseBlock } from "./tokenParsers/blockParser";
-import { Token } from "./Token";
-import { ExpressionSyntaxError } from "../errors";
-import { parseNumber } from "./tokenParsers/parseNumber";
 
 export class Parser {
     private state: State;

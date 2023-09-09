@@ -22,6 +22,7 @@ export class Expression {
     getNextToken(): Token {
         const result = new Token('', "NULL");
         this.text.skipIgnoredCharacters();
+        this.text.skipComments();
         if (this.isEnd(result)) return result;
         if (this.isDelimiter(result)) return result;
         if (this.is_bi_oct_hex(result)) return result;
