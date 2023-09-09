@@ -1,6 +1,6 @@
-import { isBigNumber, isString, typeOf } from './is.js'
-import { format as formatNumber } from './number.js'
-import { format as formatBigNumber } from './bignumber/formatter.js'
+import { isBigNumber, isString, typeOf } from './is'
+import { format as formatNumber } from './number'
+import { format as formatBigNumber } from './bignumber/formatter'
 
 /**
  * Check if a text ends with a certain string.
@@ -51,7 +51,7 @@ export function endsWith(text, search) {
  *     have been more, they are deleted and replaced by an ellipsis).
  * @return {string} str
  */
-export function format(value: any, options): string {
+export function format(value: any, options?): string {
   const result = _format(value, options)
   if (options && typeof options === 'object' && 'truncate' in options &&
     result.length > options.truncate) {

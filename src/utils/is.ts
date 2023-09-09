@@ -116,27 +116,27 @@ export function isUndefined(x: any) {
 }
 
 export function isAccessorNode(x: any) {
-    return (x && x.isAccessorNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isAccessorNode === true) || false
 }
 
 export function isArrayNode(x: any) {
-    return (x && x.isArrayNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isArrayNode === true) || false
 }
 
 export function isAssignmentNode(x: any) {
-    return (x && x.isAssignmentNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isAssignmentNode === true) || false
 }
 
 export function isBlockNode(x: any) {
-    return (x && x.isBlockNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isBlockNode === true) || false
 }
 
 export function isConditionalNode(x: any) {
-    return (x && x.isConditionalNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isConditionalNode === true) || false
 }
 
 export function isConstantNode(x: any) {
-    return (x && x.isConstantNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isConstantNode === true) || false
 }
 
 /* Very specialized: returns true for those nodes which in the numerator of
@@ -158,43 +158,43 @@ export function rule2Node(node: any) {
 }
 
 export function isFunctionAssignmentNode(x: any) {
-    return (x && x.isFunctionAssignmentNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isFunctionAssignmentNode === true) || false
 }
 
 export function isFunctionNode(x: any) {
-    return (x && x.isFunctionNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isFunctionNode === true) || false
 }
 
 export function isIndexNode(x: any) {
-    return (x && x.isIndexNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isIndexNode === true) || false
 }
 
 export function isNode(x: any) {
-    return (x && x.isNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isNode === true) || false
 }
 
 export function isObjectNode(x: any) {
-    return (x && x.isObjectNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isObjectNode === true) || false
 }
 
 export function isOperatorNode(x: any) {
-    return (x && x.isOperatorNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isOperatorNode === true) || false
 }
 
 export function isParenthesisNode(x: any) {
-    return (x && x.isParenthesisNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isParenthesisNode === true) || false
 }
 
 export function isRangeNode(x: any) {
-    return (x && x.isRangeNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isRangeNode === true) || false
 }
 
 export function isRelationalNode(x: any) {
-    return (x && x.isRelationalNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isRelationalNode === true) || false
 }
 
 export function isSymbolNode(x: any) {
-    return (x && x.isSymbolNode === true && x.constructor.prototype.isNode === true) || false
+    return (x && x.isSymbolNode === true) || false
 }
 
 export function isChain(x: any) {
@@ -213,4 +213,12 @@ export function typeOf(x: any) {
     }
 
     return t // can be 'string', 'number', 'boolean', 'function', 'bigint', ...
+}
+
+export function isReliableNodeForUnary(x: any): boolean {
+    return isAccessorNode(x) ||
+        isConstantNode(x) ||
+        isFunctionNode(x) ||
+        isParenthesisNode(x) ||
+        isSymbolNode(x)
 }

@@ -18,6 +18,8 @@ export class State {
         this.scope = new Scope(scope, (item: any) => item, (item: any) => item);
     }
 
+    get tokens(): Array<string> { return this._tokens.map(t => t.Value); }
+
     /**
      * it calculate all the tokens in an expression.
      * @returns {Queue<Token>} return a queue of tokens generated from the expression
@@ -27,16 +29,9 @@ export class State {
         this._tokens = new Queue();
         while (true) {
             const token = this._expression.getNextToken();
-            if (token) this._tokens.enqueue(token);
+            if (token.Value) this._tokens.enqueue(token);
             else break;
         }
-        // link tokens together
-        this._tokens.reduce((prev: Token, curr: Token, c: number, arr: []): any => {
-            prev.Next = curr;
-            curr.Prev = prev;
-            return curr;
-        });
-
         return this._tokens;
     }
 
@@ -86,5 +81,10 @@ export class State {
      * @returns {boolean} return True if it is equal
      */
     isType(type: TokenType): boolean { return this.token.Type === type; }
+
+
+    getErrorOnHead(): string {
+        return this._expression.getErrorOnHead(this.token);
+    }
 }
 

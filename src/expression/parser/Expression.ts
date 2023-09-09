@@ -8,7 +8,7 @@ import { StringChar } from "../../utils/StringChar";
 
 export class Expression {
     private text: StringChar;
-
+    private lastToken: Token;
     constructor(expression: string) {
         if (!expression) throw new EmptyExpressionError()
         this.text = new StringChar(expression);
@@ -20,6 +20,16 @@ export class Expression {
      * @private
      */
     getNextToken(): Token {
+        const result = this.calculateNextToken();
+        if (this.lastToken && result.Value) {
+            this.lastToken.Next = result;
+            result.Prev = this.lastToken;
+        }
+        this.lastToken = result;
+        return result;
+    }
+
+    private calculateNextToken(): Token {
         const result = new Token('', "NULL");
         this.text.skipIgnoredCharacters();
         this.text.skipComments();
@@ -28,14 +38,33 @@ export class Expression {
         if (this.is_bi_oct_hex(result)) return result;
         if (this.isNumber(result)) return result;
         if (this.is_variable_function_namedOperator(result)) return result;
+        if (this.isEnd(result)) {
+            result.head = this.text.head - result.Value.length;
+            return result;
+        }
+        if (this.isDelimiter(result)) {
+            result.head = this.text.head - result.Value.length;
+            return result;
+        }
+        if (this.is_bi_oct_hex(result)) {
+            result.head = this.text.head - result.Value.length;
+            return result;
+        }
+        if (this.isNumber(result)) {
+            result.head = this.text.head - result.Value.length;
+            return result;
+        }
+        if (this.is_variable_function_namedOperator(result)) {
+            result.head = this.text.head - result.Value.length;
+            return result;
+        }
 
         // something unknown is found, wrong characters -> a syntax error
         result.setType("UNKNOWN");
         while (!this.text.currentIs('')) {
             this.appendCurrent(result);
         }
-        return undefined;
-        throw new ExpressionSyntaxError(result.Value)
+        return result;
     }
 
     /**
@@ -120,11 +149,10 @@ export class Expression {
             // get number, can have a single dot
             if (this.text.currentIs('.')) {
                 this.appendCurrent(token);
-
                 if (!this.text.isDigit()) {
                     // this is no number, it is just a dot (can be dot notation)
                     token.setType("DELIMITER");
-                    return false;
+                    return true;
                 }
             } else {
                 this.appendAllDigits(token);
@@ -175,6 +203,10 @@ export class Expression {
     }
 
 
+
+    getErrorOnHead(token: Token): string {
+        return this.text.getErrorOnHead(token.Value.length, token.head);
+    }
 
 
 }

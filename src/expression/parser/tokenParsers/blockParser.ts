@@ -1,5 +1,6 @@
 import { ConstantNode } from "../../node/ConstantNode";
 import { ExpressionNode } from "../../node/ExpressionNode"
+import { State } from "../State";
 import { parseRelational } from "./parseRelational"
 
 /**
@@ -9,7 +10,7 @@ import { parseRelational } from "./parseRelational"
  * @return {ExpressionNode} node
  * @private
  */
-export function parseBlock(state): ExpressionNode {
+export function parseBlock(state: State): ExpressionNode {
   let result: ExpressionNode;
   if (state.token) result = parseRelational(state);
   if (!result) result = new ConstantNode(undefined);

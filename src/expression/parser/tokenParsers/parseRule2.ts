@@ -1,8 +1,9 @@
-import { rule2Node } from "../../../utils/is"
-import { ExpressionNode } from "../../node/ExpressionNode"
-import { OperatorNode } from "../../node/OperatorNode"
-import { State } from "../State"
-import { parsePercentage } from "./parsePercentage"
+import { rule2Node } from "../../../utils/is";
+import { ExpressionNode } from "../../node/ExpressionNode";
+import { OperatorNode } from "../../node/OperatorNode";
+import { State } from "../State";
+import { parseImplicitMultiplication } from "./parseImplicitMultiplication";
+import { parsePercentage } from "./parsePercentage";
 
 /**
  * Infamous "rule 2" as described in https://github.com/josdejong/mathjs/issues/792#issuecomment-361065370
@@ -33,14 +34,18 @@ export function parseRule2(state: State): ExpressionNode {
                     // We've matched the pattern "number / number symbol".
                     // Rewind once and build the "number / number" node; the symbol will be consumed later
                     state.rewind(); // one time to get to the number
-                    last = parsePercentage(state)
+
+                    last = parseImplicitMultiplication(state)
                     node = new OperatorNode('/', 'divide', [node, last])
                 } else {
                     // Not a match, so rewind
                     state.rewind().rewind(); // two times to get to the "/" delimiter again 
                     break;
                 }
-            } else break;
+            } else {
+                state.rewind();
+                break;
+            }
         } else {
             break
         }

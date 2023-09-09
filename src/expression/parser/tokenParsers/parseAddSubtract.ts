@@ -1,3 +1,4 @@
+import { isReliableNodeForUnary } from "../../../utils/is";
 import { hasOwnProperty } from "../../../utils/object";
 import { ExpressionNode } from "../../node/ExpressionNode"
 import { OperatorNode } from "../../node/OperatorNode";
@@ -10,7 +11,7 @@ import { parseMultiplyDivide } from "./parseMultiplyDivide"
  * @private
  */
 export function parseAddSubtract(state: State): ExpressionNode {
-    let node, name, fn, params
+    let node, fn, params
 
     node = parseMultiplyDivide(state);
 
@@ -18,19 +19,22 @@ export function parseAddSubtract(state: State): ExpressionNode {
         '+': 'add',
         '-': 'subtract'
     }
+
     while (hasOwnProperty(operators, state.token.Value)) {
-        name = state.token.Value
-        fn = operators[name]
+        const token = state.token;
+        fn = operators[token.Value]
+
 
         state.goAHead();
 
         const rightNode = parseMultiplyDivide(state)
+
         if ((rightNode as OperatorNode).isPercentage) {
             params = [node, new OperatorNode('*', 'multiply', [node, rightNode])]
         } else {
             params = [node, rightNode]
         }
-        node = new OperatorNode(name, fn, params)
+        node = new OperatorNode(token.Value, fn, params)
     }
 
     return node;

@@ -1,5 +1,5 @@
-import { setSafeProperty, hasSafeProperty, getSafeProperty } from './customs.js'
-import { isObject } from './is.js'
+import { setSafeProperty, hasSafeProperty, getSafeProperty } from './customs'
+import { isObject } from './is'
 
 /**
  * A map facade on a bare object.
