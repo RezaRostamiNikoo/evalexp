@@ -32,6 +32,12 @@ export class Expression {
     private calculateNextToken(): Token {
         const result = new Token('', "NULL");
         this.text.skipIgnoredCharacters();
+        this.text.skipComments();
+        if (this.isEnd(result)) return result;
+        if (this.isDelimiter(result)) return result;
+        if (this.is_bi_oct_hex(result)) return result;
+        if (this.isNumber(result)) return result;
+        if (this.is_variable_function_namedOperator(result)) return result;
         if (this.isEnd(result)) {
             result.head = this.text.head - result.Value.length;
             return result;

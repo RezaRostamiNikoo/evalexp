@@ -112,6 +112,11 @@ export class StringChar {
             else break;
         }
     }
+
+    skipComments() {
+        while (this.getString(2))
+            if ()
+    }
     /**
      * it checks if there is any more character to checks. otherwise this means that it is at the end
      * @returns {boolean} true if it is the end 
