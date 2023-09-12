@@ -4,14 +4,14 @@ import { Token } from "./Token";
 import { DELIMITERS } from "./constants";
 import { isAlpha, isDecimalMark, isDigit, isDigitDot, isHexDigit, isWhitespace } from "../../utils/helper";
 import { TokenType } from "./types";
-import { StringChar } from "../../utils/StringChar";
+import { StringAnalyzer } from "../../utils/StringChar";
 
 export class Expression {
-    private text: StringChar;
+    private text: StringAnalyzer;
     private lastToken: Token;
     constructor(expression: string) {
         if (!expression) throw new EmptyExpressionError()
-        this.text = new StringChar(expression);
+        this.text = new StringAnalyzer(expression);
     }
 
     /**

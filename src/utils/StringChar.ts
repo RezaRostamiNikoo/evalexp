@@ -1,15 +1,25 @@
 import { DELIMITERS } from "../expression/parser/constants";
 import { isAlpha, isDecimalMark, isDigit, isDigitDot, isHexDigit, isWhitespace } from "./helper";
 
-export class StringChar {
+export class StringAnalyzer {
 
+    /** It holds the main string this class is working on */
     private _text: string = '';
-    private _head: number = 0;   // based on theory of computation head is the poiner to the current character
 
+    /** based on theory of computation head is the poiner to the current character */
+    private _head: number = 0;
+
+    /** this is responsible for going further on string virtually and if every thing is acceptable it represent that piece of string between _head and _scout */
+    private _scout: number = 0;
+
+    /**
+     * @param text this is the text you want to analyze in this class
+     */
     constructor(text: string) {
         this._text = text;
     }
 
+    /** this represents the location (index) of where the class is ready to analyse */
     get head(): number {
         return this._head;
     }
