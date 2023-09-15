@@ -1,5 +1,5 @@
 // map with all delimiters
-export const DELIMITERS: any = {
+export const DELIMITERS: object = {
     ',': true,
     '(': true,
     ')': true,
@@ -25,7 +25,6 @@ export const DELIMITERS: any = {
     '.GE.': true,
     '.LT.': true,
     '.LE.': true,
-
 }
 
 
