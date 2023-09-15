@@ -1,4 +1,5 @@
 import { State } from "../parser";
+import { StringAnalyzer } from "../parser/StringAnalyzer";
 
 export * from "./EmptyExpressionError";
 export * from "./ExpressionSyntaxError";
@@ -18,4 +19,18 @@ export function createSyntaxError(state: State, message: string) {
     const error = new SyntaxError(message + '\n' + state.getErrorOnHead() + '\n)');
 
     return error;
+}
+
+
+export class DigitExpectedException extends Error {
+
+    constructor(pointerOnString: string) {
+        super('Digit expected, got \n' + pointerOnString);
+    }
+}
+
+export class UnknownTokenException extends Error {
+    constructor(pointerOnString: string) {
+        super('Unknown Token \n' + pointerOnString);
+    }
 }

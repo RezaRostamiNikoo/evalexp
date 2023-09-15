@@ -195,27 +195,27 @@ export class StringAnalyzer {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     isDigitDot(offset: number = 0): boolean {
-        return isDigitDot(this.charByHead(offset));
+        return isDigitDot(this.charByScout(offset));
     }
 
     isDigit(offset: number = 0): boolean {
-        return isDigit(this.charByHead(offset + 1));
+        return isDigit(this.charByScout(offset + 1));
     }
 
     isWhitespace(offset: number = 0) {
-        return isWhitespace(this.charByHead(offset));
+        return isWhitespace(this.charByScout(offset));
     }
 
     isDecimalMark(offset: number = 0): boolean {
-        return isDecimalMark(this.charByHead(offset), this.charByHead(offset + 1));
+        return isDecimalMark(this.charByScout(offset), this.charByScout(offset + 1));
     }
 
     isHexDigit(offset: number = 0): boolean {
-        return isHexDigit(this.charByHead(offset));
+        return isHexDigit(this.charByScout(offset));
     }
 
     isAlpha(offset: number = 0) {
-        return isAlpha(this.charByHead(offset), this.charByHead(offset - 1), this.charByHead(offset + 1));
+        return isAlpha(this.charByScout(offset), this.charByScout(offset - 1), this.charByScout(offset + 1));
     }
 
     /**
@@ -231,29 +231,54 @@ export class StringAnalyzer {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-
     /**
-     * itnot only extracs the characters in the text from the location of head forward 
-     * it also changes the head location based on the number of character it extracts
+     * itnot only extracs the characters in the text from the location of `head` to the location of `scout` 
+     * it also changes the `head` location and set to the `scout` location
      * @param {string} chars returns extracted charcter
      */
-    extractChar(chars: number = 1): string {
-        const result = this.chunkFromHead(chars);
-        this.headForward(chars);
+    tokenizeHeadToScout(): string {
+        const result = this.chunkFromHead(this._scout - this._head);
+        this._head = this._scout;
         return result;
     }
 
-    tokenFromHead(length: number): string {
-        return this.chunkFromHead(length);
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    getErrorOnIndex(chars: number, index: number): string {
+    /**
+     * it generates a text with pointer under a specific location look at the below example
+     * generated text:
+     * ```
+     *      ---------------------------
+     *      24 + 12 ** 32 / 4
+     *               ^
+     *      ---------------------------
+     * ```
+     * @param {number} index location to start '^' being placed
+     * @param {number} lengthOfPointers number of '^' char which are placed under the text
+     * @returns {string} returns a text with pointer '^^^' under the location in index
+     */
+    generatePointer(index: number, lengthOfPointers: number = 1): string {
         const result = [];
+        result.push(Array(this._text.length).fill("-"));
         result.push(this._text);
         let signText = "";
         for (let i = 0; i < index; i++) signText += " ";
-        for (let i = 0; i < chars; i++) signText += "^";
+        for (let i = 0; i < lengthOfPointers; i++) signText += "^";
         result.push(signText);
+        result.push(Array(this._text.length).fill("-"));
         return result.join('\n');
+    }
+
+
+    generatePonterOnScout(): string {
+        return this.generatePointer(this._scout)
+    }
+    generatePonterOnHead(): string {
+        return this.generatePointer(this._head)
     }
 }

@@ -1,20 +1,15 @@
 import { TokenType } from "./types";
 
 export class Token {
-    private _value: string = "";
-    private _type: TokenType = "NULL";
-    private _level: number = 0;
-    private next: Token;
-    private prev: Token;
-    private _head: number = 0;
+    private _value: string;
+    private _type: TokenType;
+    private _index: number;
 
-
-    constructor(initValue: string, initType: TokenType, level: number = 0) {
+    constructor(initValue: string, initType: TokenType, indexInString: number) {
         this._value = initValue;
         this._type = initType;
-        this._level = level;
+        this._index = indexInString;
     }
-
 
     /**
      * it checks if the current token is the given token or not
@@ -25,6 +20,17 @@ export class Token {
         return this._value !== token;
     }
 
+    get index(): number { return this._index; }
+    get Value(): string { return this._value; }
+    get Type(): TokenType { return this._type; }
+
+    /**
+     * it sets token 
+     * @param {string} tokenString token 
+     * @param {number} type it is optional. if it is set then at the same time token value and type will be changed 
+     */
+    setString(tokenString: string): this { this._value = tokenString; return this; }
+
     /**
      * it sets token type
      * @param {number} tokenType token type
@@ -32,56 +38,4 @@ export class Token {
     setType(tokenType: TokenType) {
         this._type = tokenType;
     }
-
-    get head(): number { return this._head; }
-    set head(value: number) { this._head = value; }
-    /**
-     * return token
-     * @returns {string} returns the current token
-     */
-    get Value(): string { return this._value; }
-    /**
-     * return token type
-     * @returns {string} returns the current token
-     */
-    get Type(): TokenType { return this._type; }
-    /**
-     * return level og token
-     * @returns {number} returns the token 
-     */
-    get Level(): TokenType { return this._type; }
-    set Level(value: number) { this._level = value; }
-    /**
-     * it sets token 
-     * @param {string} token token 
-     * @param {number} type it is optional. if it is set then at the same time token value and type will be changed 
-     */
-    set(token: string, type?: TokenType) {
-        this._value = token;
-        if (type) this.setType(type);
-    }
-
-    /**
-     * it appends a token to the current token 
-     * @param {number} type it is optional. if it is set then at the same time token value and type will be changed 
-     * @param {string} token token 
-     */
-    append(token: string, type?: TokenType) {
-        this._value += token;
-        if (type) this.setType(type);
-    }
-
-    incrementLevel() { this._level++; }
-    decrementLevel() { this._level--; }
-
-
-
-    set Next(value: Token) { this.next = value; }
-    set Prev(value: Token) { this.prev = value; }
-
-    get Next() { return this.next; }
-    get Prev() { return this.prev; }
-
-
-
 }

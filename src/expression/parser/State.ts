@@ -1,6 +1,6 @@
 
 import { Scope } from "./Scope";
-import { Expression } from "./Expression";
+import { Tokenizer } from "./Tokenizer";
 import { Token } from "./Token";
 import { TokenType } from "./types";
 import { Queue } from "../../utils/Queue";
@@ -8,13 +8,12 @@ import { Stack } from "../../utils/Stack";
 
 export class State {
     private scope: Scope;
-    private _expression: Expression; // current expression
-    private _level: number = 0;
+    private _expression: Tokenizer; // current expression
     private _tokens: Queue<Token>;
     private _deletedTokens: Stack<Token> = new Stack();
 
     constructor(expression: string, scope?: Map<string, any>) {
-        this._expression = new Expression(expression);
+        this._expression = new Tokenizer(expression);
         this.scope = new Scope(scope, (item: any) => item, (item: any) => item);
     }
 
@@ -35,31 +34,13 @@ export class State {
         return this._tokens;
     }
 
-    /**
-     * It increases the level of the current and all tokens after that. It means that it set a new level for current token
-     * be carefule about head and scouting
-    */
-    nextLevel() {
-        ++this._level;
-        this.getTokens().forEach(t => t.Level = this._level);
-    }
-
-    /**
-     * Close parameters.
-     * New line characters will no longer be ignored
-     * be carefule about head and scouting
-     */
-    prevLevel() {
-        --this._level;
-        this.getTokens().forEach(t => t.Level = this._level);
-    }
 
 
     /**
      * it return the first token available in the queue without shifring it from the list
      * @returns {Token} returns the current token
      */
-    get token(): Token { return this.getTokens().peek() || new Token("", "NULL", this._level); }
+    get token(): Token { return this.getTokens().peek(); }
 
     /**
      * It shifts the current token from the queue and next toke is ready to be proccessed on
