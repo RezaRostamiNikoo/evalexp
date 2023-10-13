@@ -189,8 +189,8 @@ export class StringAnalyzer {
     }
 
     skipComments() {
-        while (this.getChunk(2))
-            if ()
+        // while (this.getChunk(2))
+            // if ()
     }
     /**
      * it checks if there is any more character to checks. otherwise this means that it is at the end
