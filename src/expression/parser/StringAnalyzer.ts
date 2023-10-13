@@ -1,44 +1,119 @@
-import { DELIMITERS } from "../expression/parser/constants";
-import { isAlpha, isDecimalMark, isDigit, isDigitDot, isHexDigit, isWhitespace } from "./helper";
+import { DELIMITERS } from "./constants";
+import { isAlpha, isDecimalMark, isDigit, isDigitDot, isHexDigit, isWhitespace } from "../../utils/helper";
 
-export class StringChar {
+export class StringAnalyzer {
 
+    /** It holds the main string this class is working on */
     private _text: string = '';
-    private _head: number = 0;   // based on theory of computation head is the poiner to the current character
 
+
+    ////////////////////////////////////
+    /// States
+
+    /** based on theory of computation head is the poiner to the current character */
+    private _head: number = 0;
+
+    /** this is responsible for going further on string virtually and if every thing is acceptable it represent that piece of string between _head and _scout */
+    private _scout: number = 0;
+
+    ////////////////////////////////////
+
+    /**
+     * @param text this is the text you want to analyze in this class
+     */
     constructor(text: string) {
         this._text = text;
     }
 
-    get head(): number {
-        return this._head;
+    /** this represents the location (index) of where the class is ready to analyse */
+    get head(): number { return this._head; }
+
+    /** this represents the location (index) of where the class has searching before moving (scouting) to analyse */
+    get Scout(): number { return this._scout; }
+
+    /** this reset the text the class is going to work on
+     * @param {string} text the text that you want to analyze
+     * @returns {StringAnalyzer} 
+     */
+    resetText(text: string): this {
+        this._text = text;
+        this.resetAll();
+        return this;
     }
 
+    /** this method reset all the states of the class to the first step*/
+    resetAll() { this.resetHead(); this.resetScout(); return this; }
+
+    /** this just reset the head location to the first of the string being analyzed */
+    resetHead(): this { this._head = 0; return this; }
+
+    /** this just reset the scout location to the first of the string being analyzed */
+    resetScout(): this { this._scout = 0; return this; }
+
     /**
-     * Get the next character from the expression.
-     * The character is stored into the char c. If the end of the expression is
-     * reached, the function puts an empty string in c.
-     * @private
+     * It changes the location (index) of the head on the string forward by an amount of `step`
+     * @param {number} step the number of steps to move `head`
      */
-    incrementIndex(step: number = 1) {
+    moveForward(step: number = 1) {
         this._head += step;
     }
 
     /**
+     * It moves the location (index) of the head on the string backward by an amount of `step`
+     * @param {number} [step=1] the number of steps to move `head`
+     */
+    moveBackward(step: number = 1) {
+        this._head -= step;
+    }
+
+    /**
+     * It moves the location (index) of the `scout` on the string forward by an amount of `step`
+     * @param {number} [step=1] the number of steps to move `scout`
+     */
+    scoutForward(step: number = 1) {
+        this._scout += step;
+    }
+
+    /**
+     * It moves the location (index) of the `scout` on the string backward by an amount of `step`
+     * @param {number} [step=1] the number of steps to move `scout`
+     */
+    scoutbackward(step: number = 1) {
+        this._scout += step;
+    }
+
+    /**
      * View upto `length` characters of the expression starting at the current character.
-     *
      * @param {number} [length=1] Number of characters to view
      * @returns {string}
      */
-    getString(length: number = 1): string {
+    getChunk(length: number = 1): string {
         return this._text.substring(this._head, this._head + length)
+    }
+
+    /** 
+     * this method helps to get a character with an `offset` distance from head
+     * @param {number} offset the distance from head. it can be positive or negative
+     * @returns {string} a char
+     */
+    getCharByHead(offset: number = 0): string {
+        return this._text.substring(this._head + offset, this._head + offset + 1)
+    }
+
+    /** 
+     * this method returns a character with an `offset` distance from head
+     * @param {number} offset the distance from `scout`. it can be positive or negative
+     * @returns {string} a char
+     */
+    getCharByScout(offset: number = 0): string {
+        return this._text.substring(this._scout, this._scout + offset)
     }
 
     /**
      * View the current character. Returns '' if end of expression is reached.
      * @returns {string}
      */
-    current(): string { return this.getString(1); }
+    current(): string { return this.getChunk(1); }
 
     /**
      * Preview the previous character from the expression.
@@ -108,9 +183,14 @@ export class StringChar {
         // skip over ignored characters:
         while (true) {
             if (chars.includes(this.current()))
-                this.incrementIndex();
+                this.moveForward();
             else break;
         }
+    }
+
+    skipComments() {
+        while (this.getChunk(2))
+            if ()
     }
     /**
      * it checks if there is any more character to checks. otherwise this means that it is at the end
@@ -124,7 +204,7 @@ export class StringChar {
      * @returns {boolean} returns boolean
      */
     isDelimiter(chars: number) {
-        const str = this.getString(chars);
+        const str = this.getChunk(chars);
         if (str.length === chars)
             return DELIMITERS[str];
         return false;
@@ -136,8 +216,8 @@ export class StringChar {
      * @param {string} chars returns extracted charcter
      */
     extractChar(chars: number = 1): string {
-        const result = this.getString(chars);
-        this.incrementIndex(chars);
+        const result = this.getChunk(chars);
+        this.moveForward(chars);
         return result;
     }
 

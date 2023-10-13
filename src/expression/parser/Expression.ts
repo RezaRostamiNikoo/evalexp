@@ -4,14 +4,14 @@ import { Token } from "./Token";
 import { DELIMITERS } from "./constants";
 import { isAlpha, isDecimalMark, isDigit, isDigitDot, isHexDigit, isWhitespace } from "../../utils/helper";
 import { TokenType } from "./types";
-import { StringChar } from "../../utils/StringChar";
+import { StringAnalyzer } from "./StringAnalyzer";
 
 export class Expression {
-    private text: StringChar;
+    private text: StringAnalyzer;
     private lastToken: Token;
     constructor(expression: string) {
         if (!expression) throw new EmptyExpressionError()
-        this.text = new StringChar(expression);
+        this.text = new StringAnalyzer(expression);
     }
 
     /**
@@ -32,6 +32,12 @@ export class Expression {
     private calculateNextToken(): Token {
         const result = new Token('', "NULL");
         this.text.skipIgnoredCharacters();
+        this.text.skipComments();
+        if (this.isEnd(result)) return result;
+        if (this.isDelimiter(result)) return result;
+        if (this.is_bi_oct_hex(result)) return result;
+        if (this.isNumber(result)) return result;
+        if (this.is_variable_function_namedOperator(result)) return result;
         if (this.isEnd(result)) {
             result.head = this.text.head - result.Value.length;
             return result;
@@ -79,7 +85,7 @@ export class Expression {
         const maxLengthOfADelimiter = 4;
         for (let step = maxLengthOfADelimiter; step > 0; step--) {
             if (this.text.isDelimiter(step)) {
-                this.set(token, this.text.getString(step), "DELIMITER");
+                this.set(token, this.text.getChunk(step), "DELIMITER");
                 return true;
             }
         }
@@ -88,7 +94,7 @@ export class Expression {
 
     is_bi_oct_hex(token: Token): boolean {
         // check for binary, octal, or hex
-        const c2 = this.text.getString(2)
+        const c2 = this.text.getChunk(2)
         if (c2 === '0b' || c2 === '0o' || c2 === '0x') {
             this.appendCurrent(token, "NUMBER");
             this.appendCurrent(token);
@@ -174,7 +180,7 @@ export class Expression {
                         throw new Error('Digit expected, got "' + this.text.current() + '"')
                     }
                 } else if (this.text.nextIs('.')) {
-                    this.text.incrementIndex()
+                    this.text.moveForward()
                     // throw this.createSyntaxError('Digit expected, got "' + this.currentCharacter() + '"')
                     throw new Error('Digit expected, got "' + this.text.current() + '"')
                 }
