@@ -5,7 +5,6 @@ export class Queue<T> implements IQueue<T>{
 
     constructor(...items: Array<T>) {
         if (items.length) this.items = items;
-
     }
 
     isEmpty(): boolean { return this.items.length == 0; }
