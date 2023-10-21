@@ -2,8 +2,7 @@
 import { Tokenizer } from "./Tokenizer";
 import { Token } from "./Token";
 import { TokenType } from "./types";
-import { Queue } from "../utils/Queue";
-import { Stack } from "../utils/Stack";
+import { Queue, Stack } from "predefined-ds";
 
 export class State {
     private _tokenizer: Tokenizer; // current expression
