@@ -1,6 +1,6 @@
-import { map } from "../utils/array";
+import { IScope } from "../interfaces";
 import { getSafeProperty } from "../utils/customs";
-import { isArray, isConstantNode, isMatrix, isNode, isString, typeOf } from "../utils/is";
+import { isArray, isConstantNode, isMatrix, isNode, isString, isSymbolNode, typeOf } from "../utils/is";
 import { ExpressionNode } from "./ExpressionNode"
 
 export class IndexNode extends ExpressionNode {
@@ -11,7 +11,7 @@ export class IndexNode extends ExpressionNode {
     get isIndexNode(): boolean { return true }
 
 
-    /**
+    /** 
      * @constructor IndexNode
      * @extends Node
      *
@@ -44,64 +44,20 @@ export class IndexNode extends ExpressionNode {
      * Compile a node into a JavaScript function.
      * This basically pre-calculates as much as possible and only leaves open
      * calculations which depend on a dynamic scope with variables.
-     * @param {Object} math     Math.js namespace with functions and constants.
-     * @param {Object} argNames An object with argument names as key and `true`
-     *                          as value. Used in the SymbolNode to optimize
-     *                          for arguments from user assigned functions
-     *                          (see FunctionAssignmentNode) or special symbols
-     *                          like `end` (see IndexNode).
-     * @return {function} Returns a function which can be called like:
-     *                        evalNode(scope: Object, args: Object, context: *)
+     * @param {Object} mathFunctions namespace with functions and constants.
+     * @return {(scope: IScope): any} Returns a function which can be called like: evalNode(scope: Object)
      */
-    _compile(math, argNames) {
-        // TODO: implement support for bignumber (currently bignumbers are silently
-        //       reduced to numbers when changing the value to zero-based)
-
-        // TODO: Optimization: when the range values are ConstantNodes,
-        //       we can beforehand resolve the zero-based value
-
+    _compile(mathFunctions: Object): (scope: IScope) => any {
         // optimization for a simple object property
-        const evalDimensions = map(this.dimensions, function (dimension, i) {
-            const needsEnd = dimension
-                .filter(node => node.isSymbolNode && node.name === 'end')
-                .length > 0
+        if (this.isObjectProperty() && this.dotNotation) {
+            return (scope: IScope) => this.dimensions[0].value
+        }
+        const evalDimensions = this.dimensions.map(d => d._compile(mathFunctions))
 
-            if (needsEnd) {
-                // SymbolNode 'end' is used inside the index,
-                // like in `A[end]` or `A[end - 2]`
-                const childArgNames = Object.create(argNames)
-                childArgNames.end = true
-
-                const _evalDimension = dimension._compile(math, childArgNames)
-
-                return function evalDimension(scope, args, context) {
-                    if (!isMatrix(context) && !isArray(context) && !isString(context)) {
-                        throw new TypeError(
-                            'Cannot resolve "end": ' +
-                            'context must be a Matrix, Array, or string but is ' +
-                            typeOf(context))
-                    }
-
-                    // const s = size(context).valueOf()
-                    // const childArgs = Object.create(args)
-                    // childArgs.end = s[i]
-
-                    // return _evalDimension(scope, childArgs, context)
-                }
-            } else {
-                // SymbolNode `end` not used
-                return dimension._compile(math, argNames)
-            }
-        })
-
-        const index = getSafeProperty(math, 'index')
-
-        return function evalIndexNode(scope, args, context) {
-            const dimensions = map(evalDimensions, function (evalDimension) {
-                return evalDimension(scope, args, context)
+        return (scope: IScope) => {
+            return evalDimensions.map(evalDimension => {
+                return evalDimension(scope)
             })
-
-            return index(...dimensions)
         }
     }
 
@@ -145,7 +101,7 @@ export class IndexNode extends ExpressionNode {
      */
     isObjectProperty() {
         return this.dimensions.length === 1 &&
-            isConstantNode(this.dimensions[0]) &&
+            isSymbolNode(this.dimensions[0]) &&
             typeof this.dimensions[0].value === 'string'
     }
 

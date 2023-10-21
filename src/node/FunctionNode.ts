@@ -1,81 +1,10 @@
+import { IScope } from "../interfaces";
 import { getSafeMethod, getSafeProperty, getSafePropertyFromComplexObject } from "../utils/customs";
 import { isAccessorNode, isFunctionAssignmentNode, isIndexNode, isNode, isSymbolNode } from "../utils/is";
-import { hasOwnProperty } from "../utils/object";
 import { createSubScope } from "../utils/scope";
-import { format } from "../utils/string";
 import { ExpressionNode } from "./ExpressionNode";
 import { SymbolNode } from "./SymbolNode";
 
-/* format to fixed length */
-const strin = entity => format(entity, { truncate: 78 })
-
-/*
- * Expand a LaTeX template
- *
- * @param {string} template
- * @param {Node} node
- * @param {Object} options
- * @private
- **/
-function expandTemplate(template, node, options) {
-    let latex = ''
-
-    // Match everything of the form ${identifier} or ${identifier[2]} or $$
-    // while submatching identifier and 2 (in the second case)
-    const regex = /\$(?:\{([a-z_][a-z_0-9]*)(?:\[([0-9]+)\])?\}|\$)/gi
-
-    let inputPos = 0 // position in the input string
-    let match
-    while ((match = regex.exec(template)) !== null) { // go through all matches
-        // add everything in front of the match to the LaTeX string
-        latex += template.substring(inputPos, match.index)
-        inputPos = match.index
-
-        if (match[0] === '$$') { // escaped dollar sign
-            latex += '$'
-            inputPos++
-        } else { // template parameter
-            inputPos += match[0].length
-            const property = node[match[1]]
-            if (!property) {
-                throw new ReferenceError('Template: Property ' + match[1] + ' does not exist.')
-            }
-            if (match[2] === undefined) { // no square brackets
-                switch (typeof property) {
-                    case 'string':
-                        latex += property
-                        break
-                    case 'object':
-                        if (isNode(property)) {
-                            latex += property.toTex(options)
-                        } else if (Array.isArray(property)) {
-                            // make array of Nodes into comma separated list
-                            latex += property.map(function (arg, index) {
-                                if (isNode(arg)) {
-                                    return arg.toTex(options)
-                                }
-                                throw new TypeError('Template: ' + match[1] + '[' + index + '] is not a Node.')
-                            }).join(',')
-                        } else {
-                            throw new TypeError('Template: ' + match[1] + ' has to be a Node, String or array of Nodes')
-                        }
-                        break
-                    default:
-                        throw new TypeError('Template: ' + match[1] + ' has to be a Node, String or array of Nodes')
-                }
-            } else { // with square brackets
-                if (isNode(property[match[2]] && property[match[2]])) {
-                    latex += property[match[2]].toTex(options)
-                } else {
-                    throw new TypeError('Template: ' + match[1] + '[' + match[2] + '] is not a Node.')
-                }
-            }
-        }
-    }
-    latex += template.slice(inputPos) // append rest of the template
-
-    return latex
-}
 
 export class FunctionNode extends ExpressionNode {
     _name: string = "FunctionNode";
@@ -100,16 +29,11 @@ export class FunctionNode extends ExpressionNode {
      */
     constructor(fn: SymbolNode | string, args: Array<ExpressionNode>) {
         super()
-        if (typeof fn === 'string') {
-            fn = new SymbolNode(fn)
-        }
+        if (typeof fn === 'string') fn = new SymbolNode(fn)
+        if (!isSymbolNode(fn)) throw new TypeError('Node expected as parameter "fn"')
 
-        // validate input
-        if (!isNode(fn)) throw new TypeError('Node expected as parameter "fn"')
-        if (!Array.isArray(args) || !args.every(isNode)) {
-            throw new TypeError(
-                'Array containing Nodes expected for parameter "args"')
-        }
+        if (!Array.isArray(args) || !args.every(isNode))
+            throw new TypeError('Array containing Nodes expected for parameter "args"')
 
         this.fn = fn
         this.args = args || []
@@ -121,151 +45,54 @@ export class FunctionNode extends ExpressionNode {
      * This basically pre-calculates as much as possible and only leaves open
      * calculations which depend on a dynamic scope with variables.
      * @param {Object} math     Math.js namespace with functions and constants.
-     * @param {Object} argNames An object with argument names as key and `true`
-     *                          as value. Used in the SymbolNode to optimize
-     *                          for arguments from user assigned functions
-     *                          (see FunctionAssignmentNode) or special symbols
-     *                          like `end` (see IndexNode).
-     * @return {function} Returns a function which can be called like:
-     *                        evalNode(scope: Object, args: Object, context: *)
+     * @return {(scope: IScope): any} Returns a function which can be called like: evalNode(scope: Object)
+
      */
-    _compile(math, argNames) {
+    _compile(mathFunctions: Object): (scope: IScope) => any {
         // compile arguments
-        const evalArgs = this.args.map((arg) => arg._compile(math, argNames))
+        const evalArgs = this.args.map((arg) => arg._compile(mathFunctions))
 
-        if (isSymbolNode(this.fn)) {
-            const name = this.fn.name
-            if (!argNames[name]) {
-                // we can statically determine whether the function
-                // has the rawArgs property
-                const fn = name in math ? getSafePropertyFromComplexObject(math, name) : undefined
-                const isRaw = typeof fn === 'function' && fn.rawArgs === true
+        const name = this.fn.name
+        const fn = name in mathFunctions ? getSafePropertyFromComplexObject(mathFunctions, name) : undefined
+        const isRaw = typeof fn === 'function' && fn.rawArgs === true
 
-                const resolveFn = (scope) => {
-                    let value
-                    if (scope.has(name)) {
-                        value = scope.get(name)
-                    } else if (name in math) {
-                        value = getSafePropertyFromComplexObject(math, name)
-                    } else {
-                        return FunctionNode.onUndefinedFunction(name)
-                    }
-                    if (typeof value === 'function') {
-                        return value
-                    }
-                    throw new TypeError(
-                        `'${name}' is not a function; its value is:\n  ${strin(value)}`
-                    )
-                }
-
-                if (isRaw) {
-                    // pass unevaluated parameters (nodes) to the function
-                    // "raw" evaluation
-                    const rawArgs = this.args
-                    return function evalFunctionNode(scope, args, context) {
-                        const fn = resolveFn(scope)
-                        return fn(rawArgs, math, createSubScope(scope, args), scope)
-                    }
-                } else {
-                    // "regular" evaluation
-                    switch (evalArgs.length) {
-                        case 0: return function evalFunctionNode(scope, args, context) {
-                            const fn = resolveFn(scope)
-                            return fn()
-                        }
-                        case 1: return function evalFunctionNode(scope, args, context) {
-                            const fn = resolveFn(scope)
-                            const evalArg0 = evalArgs[0]
-                            return fn(
-                                evalArg0(scope, args, context)
-                            )
-                        }
-                        case 2: return function evalFunctionNode(scope, args, context) {
-                            const fn = resolveFn(scope)
-                            const evalArg0 = evalArgs[0]
-                            const evalArg1 = evalArgs[1]
-                            return fn(
-                                evalArg0(scope, args, context),
-                                evalArg1(scope, args, context)
-                            )
-                        }
-                        default: return function evalFunctionNode(scope, args, context) {
-                            const fn = resolveFn(scope)
-                            const values = evalArgs.map(
-                                (evalArg) => evalArg(scope, args, context))
-                            return fn(...values)
-                        }
-                    }
-                }
-            } else { // the function symbol is an argName
-                const rawArgs = this.args
-                return function evalFunctionNode(scope, args, context) {
-                    const fn = getSafeProperty(args, name)
-                    if (typeof fn !== 'function') {
-                        throw new TypeError(
-                            `Argument '${name}' was not a function; received: ${strin(fn)}`
-                        )
-                    }
-                    if (fn.rawArgs) {
-                        // "Raw" evaluation
-                        return fn(rawArgs, math, createSubScope(scope, args), scope)
-                    } else {
-                        const values = evalArgs.map(
-                            (evalArg) => evalArg(scope, args, context))
-                        return fn.apply(fn, values)
-                    }
-                }
+        const resolveFn = (scope) => {
+            let value
+            if (name in mathFunctions) {
+                value = getSafePropertyFromComplexObject(mathFunctions, name)
+            } else if (scope.has(name)) {
+                value = scope.get(name)
+            } else {
+                throw new Error("FunctionNode._compile | there is no functino defined")
             }
-        } else if (1 == 1
-            // isAccessorNode(this.fn) &&
-            // isIndexNode(this.fn.index) &&
-            // this.fn.index.isObjectProperty()
-        ) {
-            // execute the function with the right context:
-            // the object of the AccessorNode
+            if (typeof value === 'function') {
+                return value
+            }
+            throw new TypeError(
+                `'${name}' is not a function; its value is:\n  ${value}`
+            )
+        }
 
-            // const evalObject = this.fn.object._compile(math, argNames)
-            // const prop = this.fn.index.getObjectProperty()
-            // const rawArgs = this.args
-
-            // return function evalFunctionNode(scope, args, context) {
-            //     const object = evalObject(scope, args, context)
-            //     const fn = getSafeMethod(object, prop)
-
-            //     if (fn?.rawArgs) {
-            //         // "Raw" evaluation
-            //         return fn(rawArgs, math, createSubScope(scope, args), scope)
-            //     } else {
-            //         // "regular" evaluation
-            //         const values = evalArgs.map((evalArg) => evalArg(scope, args, context))
-            //         return fn.apply(object, values)
-            //     }
-            // }
-        } else {
-            // node.fn.isAccessorNode && !node.fn.index.isObjectProperty()
-            // we have to dynamically determine whether the function has the
-            // rawArgs property
-            const fnExpr = this.fn.toString()
-            const evalFn = this.fn._compile(math, argNames)
-            const rawArgs = this.args
-
-            return function evalFunctionNode(scope, args, context) {
-                const fn = evalFn(scope, args, context)
-                if (typeof fn !== 'function') {
-                    throw new TypeError(
-                        `Expression '${fnExpr}' did not evaluate to a function; value is:` +
-                        `\n  ${strin(fn)}`
-                    )
-                }
-                if (fn.rawArgs) {
-                    // "Raw" evaluation
-                    return fn(rawArgs, math, createSubScope(scope, args), scope)
-                } else {
-                    // "regular" evaluation
-                    const values = evalArgs.map(
-                        (evalArg) => evalArg(scope, args, context))
-                    return fn.apply(fn, values)
-                }
+        // "regular" evaluation
+        switch (evalArgs.length) {
+            case 0: return (scope: IScope): any => {
+                const fn = resolveFn(scope)
+                return fn()
+            }
+            case 1: return (scope: IScope): any => {
+                const fn = resolveFn(scope)
+                const evalArg0 = evalArgs[0]
+                return fn(evalArg0(scope))
+            }
+            case 2: return (scope: IScope): any => {
+                const fn = resolveFn(scope)
+                const evalArg0 = evalArgs[0]
+                const evalArg1 = evalArgs[1]
+                return fn(evalArg0(scope), evalArg1(scope))
+            }
+            default: return (scope: IScope): any => {
+                const fn = resolveFn(scope)
+                return fn.apply(null, evalArgs.map(evalArg => evalArg(scope)))
             }
         }
     }

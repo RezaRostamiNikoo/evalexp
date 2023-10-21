@@ -1,4 +1,5 @@
-import { Stack } from "../utils/Stack";
+import { IScope } from "../interfaces";
+import { Stack } from "predefined-ds";
 import { getSafeProperty } from "../utils/customs";
 import { ExpressionNode } from "./ExpressionNode";
 
@@ -51,27 +52,22 @@ export class RelationalNode extends ExpressionNode {
      * This basically pre-calculates as much as possible and only leaves open
      * calculations which depend on a dynamic scope with variables.
      * @param {Object} math     Math.js namespace with functions and constants.
-     * @param {Object} argNames An object with argument names as key and `true`
-     *                          as value. Used in the SymbolNode to optimize
-     *                          for arguments from user assigned functions
-     *                          (see FunctionAssignmentNode) or special symbols
-     *                          like `end` (see IndexNode).
-     * @return {function} Returns a function which can be called like:
-     *                        evalNode(scope: Object, args: Object, context: *)
+     * @return {(scope: IScope): any} Returns a function which can be called like: evalNode(scope: Object)
+
      */
-    _compile(math, argNames) {
+    _compile(mathFunctions: Object): (scope: IScope) => any {
         const self = this
 
-        const compiled = this.params.map(p => p._compile(math, argNames))
+        const compiled = this.params.map(p => p._compile(mathFunctions))
 
-        return function evalRelationalNode(scope, args, context) {
+        return (scope: IScope) => {
             let evalLhs
-            let evalRhs = compiled[0](scope, args, context)
+            let evalRhs = compiled[0](scope)
 
             for (let i = 0; i < self.conditionals.length; i++) {
                 evalLhs = evalRhs
-                evalRhs = compiled[i + 1](scope, args, context)
-                const condFn = getSafeProperty(math, self.conditionals[i])
+                evalRhs = compiled[i + 1](scope)
+                const condFn = getSafeProperty(mathFunctions, self.conditionals[i])
                 if (!condFn(evalLhs, evalRhs)) {
                     return false
                 }

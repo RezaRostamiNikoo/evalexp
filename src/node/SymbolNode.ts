@@ -1,3 +1,4 @@
+import { IScope } from "../interfaces/IScope";
 import { getSafePropertyFromComplexObject } from "../utils/customs";
 import { ExpressionNode } from "./ExpressionNode";
 
@@ -20,7 +21,7 @@ export class SymbolNode extends ExpressionNode {
         if (typeof name !== 'string') {
             throw new TypeError('String expected for parameter "name"')
         }
-
+        this.value = name
         this.name = name
     }
 
@@ -31,35 +32,16 @@ export class SymbolNode extends ExpressionNode {
      * This basically pre-calculates as much as possible and only leaves open
      * calculations which depend on a dynamic scope with variables.
      * @param {Object} scope     Math.js namespace with functions and constants.
-     * @param {Object} argNames An object with argument names as key and `true`
-     *                          as value. Used in the SymbolNode to optimize
-     *                          for arguments from user assigned functions
-     *                          (see FunctionAssignmentNode) or special symbols
-     *                          like `end` (see IndexNode).
-     * @return {function} Returns a function which can be called like:
-     *                        evalNode(scope: Object, args: Object, context: *)
+     * @return {(scope: IScope): any} Returns a function which can be called like: evalNode(scope: Object)
      */
-    _compile(math, argNames): Function {
+    _compile(mathFunctions: Object): (scope: IScope) => any {
         const _this = this
         const name = this.name
 
-        if (name in math) {
-            return function (scope, args, context) {
-                // try {
-
-                return scope.has(name) ? _this.checkValueToParse(scope.get(name)) : getSafePropertyFromComplexObject(math, name)
-                // } catch { return name; }
-            }
-        } else {
-
-            return function (scope, args, context) {
-                try {
-                    return scope.has(name) ? _this.checkValueToParse(scope.get(name)) : SymbolNode.onUndefinedSymbol(name);
-                } catch {
-                    return name;
-                }
-            }
-        }
+        if (name in mathFunctions) return (scope: IScope) =>
+            scope.has(name) ? _this.checkValueToParse(scope, scope.get(name)) : getSafePropertyFromComplexObject(mathFunctions, name)
+        else return (scope: IScope) =>
+            scope.has(name) ? _this.checkValueToParse(scope, scope.get(name)) : name;
     }
 
 

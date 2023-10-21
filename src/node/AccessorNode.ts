@@ -2,6 +2,7 @@ import { IndexNode } from "./IndexNode";
 import { ExpressionNode } from "./ExpressionNode";
 import { isIndexNode, isNode } from "../utils/is";
 import { getSafeProperty } from "../utils/customs";
+import { IScope } from "../interfaces";
 
 
 // const access = accessFactory({ subset })
@@ -59,38 +60,30 @@ export class AccessorNode extends ExpressionNode {
         this.index = index
     }
 
-
-
-
     /**
      * Compile a node into a JavaScript function.
      * This basically pre-calculates as much as possible and only leaves open
      * calculations which depend on a dynamic scope with variables.
-     * @param {Object} math     Math.js namespace with functions and constants.
-     * @param {Object} argNames An object with argument names as key and `true`
-     *                          as value. Used in the SymbolNode to optimize
-     *                          for arguments from user assigned functions
-     *                          (see FunctionAssignmentNode) or special symbols
-     *                          like `end` (see IndexNode).
-     * @return {function} Returns a function which can be called like:
-     *                        evalNode(scope: Object, args: Object, context: *)
+     * @param {Object} mathFunctions namespace with functions and constants.
+     * @return {(scope: IScope): any} Returns a function which can be called like: evalNode(scope: Object)
      */
-    _compile(math, argNames) {
-        const evalObject = this.object._compile(math, argNames)
-        const evalIndex = this.index._compile(math, argNames)
+    _compile(mathFunctions: Object): (scope: IScope) => any {
+        const evalObject = this.object._compile(mathFunctions)
+        const evalIndex = this.index._compile(mathFunctions)
 
         if (this.index.isObjectProperty()) {
             const prop = this.index.getObjectProperty()
-            return function evalAccessorNode(scope, args, context) {
+            return (scope: IScope) => {
                 // get a property from an object evaluated using the scope.
-                return getSafeProperty(evalObject(scope, args, context), prop)
+                return getSafeProperty(evalObject(scope), prop)
             }
         } else {
-            return function evalAccessorNode(scope, args, context) {
-                const object = evalObject(scope, args, context)
+            return (scope: IScope) => {
+                let object = evalObject(scope)
                 // we pass just object here instead of context:
-                const index = evalIndex(scope, args, object)
-                return "access(object, index)"
+                const indexes = evalIndex(scope)
+                indexes.forEach(i => object = object[i])
+                return object
             }
         }
     }

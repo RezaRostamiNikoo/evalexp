@@ -1,12 +1,11 @@
 import { isNode } from "../utils/is";
-import { createMap } from "../utils/map";
 import { deepStrictEqual } from "../utils/object";
 import * as functions from "../defaultScopeItems";
 import { parse } from "../parser";
 import { IScope } from "../interfaces/IScope";
 
 export abstract class ExpressionNode {
-    private _scope: IScope;
+
     _name: string = "ExpressionNode";
     get type() { return 'Node' }
     get isNode() { return true }
@@ -15,33 +14,27 @@ export abstract class ExpressionNode {
 
     /**
      * Evaluate the node
-     * @param {Scope} [scope]  Scope to read/write variables
-     * @return {*}              Returns the result
+     * @param {Scope} [scope] Scope to read/write variables
+     * @return {*} Returns the result
      */
-    evaluate(scope: IScope = null): any {
-        this._scope = scope;
+    evaluate(scope: IScope = null): Object | string | number {
         return this.compile().evaluate(scope);
     }
 
     /**
      * Compile the node into an optimized, evauatable JavaScript function
-     * @return {{evaluate: function([Object])}} object
-     *                Returns an object with a function 'evaluate',
-     *                which can be invoked as expr.evaluate([scope: Object]),
-     *                where scope is an optional object with
-     *                variables.
+     * @returns {{evaluate: function([Object])}} object
+     * Returns an object with a function 'evaluate',
+     * which can be invoked as expr.evaluate([scope: Object]),
+     * where scope is an optional object with
+     * variables.
      */
-    compile() {
-        const expr = this._compile(functions, {})
-        const args = {}
-        const context = null
-
-        function evaluate(scope: IScope) {
-            return expr(scope, args, context);
-        }
-
+    compile(): { evaluate: (scope: IScope) => any } {
+        const expr = this._compile(functions)
         return {
-            evaluate
+            evaluate: (scope: IScope) => {
+                return expr(scope)
+            }
         }
     }
 
@@ -49,16 +42,10 @@ export abstract class ExpressionNode {
      * Compile a node into a JavaScript function.
      * This basically pre-calculates as much as possible and only leaves open
      * calculations which depend on a dynamic scope with variables.
-     * @param {Object} mathFunctions     Math.js namespace with functions and constants.
-     * @param {Object} argNames An object with argument names as key and `true`
-     *                          as value. Used in the SymbolNode to optimize
-     *                          for arguments from user assigned functions
-     *                          (see FunctionAssignmentNode) or special symbols
-     *                          like `end` (see IndexNode).
-     * @return {function} Returns a function which can be called like:
-     *                        evalNode(scope: Object, args: Object, context: *)
+     * @param {Object} mathFunctions namespace with functions and constants.
+     * @return {(scope: IScope): any} Returns a function which can be called like: evalNode(scope: Object)
      */
-    _compile(mathFunctions: Object, argNames: Object): Function {
+    _compile(mathFunctions: Object): (scope: IScope) => any {
         throw new Error('Method _compile must be implemented by type ' + this.type)
     }
 
@@ -295,8 +282,8 @@ export abstract class ExpressionNode {
     }
 
 
-    protected checkValueToParse(value: string): any {
-        if (typeof value === "string") return parse(value).evaluate(this._scope);
+    protected checkValueToParse(scope: IScope, value: string): any {
+        if (typeof value === "string") return parse(value).evaluate(scope);
         return value;
     }
 }

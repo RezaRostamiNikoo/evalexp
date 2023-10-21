@@ -1,4 +1,4 @@
-import { format } from "../utils/string";
+import { IScope } from "../interfaces";
 import { ExpressionNode } from "./ExpressionNode";
 
 export class ConstantNode extends ExpressionNode {
@@ -30,19 +30,13 @@ export class ConstantNode extends ExpressionNode {
      * Compile a node into a JavaScript function.
      * This basically pre-calculates as much as possible and only leaves open
      * calculations which depend on a dynamic scope with variables.
-     * @param {Object} math     Math.js namespace with functions and constants.
-     * @param {Object} argNames An object with argument names as key and `true`
-     *                          as value. Used in the SymbolNode to optimize
-     *                          for arguments from user assigned functions
-     *                          (see FunctionAssignmentNode) or special symbols
-     *                          like `end` (see IndexNode).
-     * @return {function} Returns a function which can be called like:
-     *                        evalNode(scope: Object, args: Object, context: *)
+     * @param {Object} mathFunctions namespace with functions and constants.
+     * @return {(scope: IScope): any} Returns a function which can be called like: evalNode(scope: Object)
      */
-    _compile(math, argNames) {
+    _compile(mathFunctions: Object): (scope: IScope) => any {
         const value = this.value
 
-        return function evalConstantNode() {
+        return (scope: IScope) => {
             return parseFloat(value);
         }
     }

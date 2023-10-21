@@ -1,4 +1,4 @@
-import { map } from "../utils/array";
+import { IScope } from "../interfaces";
 import { getSafeProperty, getSafePropertyFromComplexObject, isSafeMethod } from "../utils/customs";
 import { isNode } from "../utils/is";
 import { ExpressionNode } from "./ExpressionNode";
@@ -30,14 +30,14 @@ export class OperatorNode extends ExpressionNode {
 
         // validate input
         if (typeof op !== 'string') {
-            throw new TypeError('string expected for parameter "op"')
+            throw new TypeError('OperatorNode.constructor | string expected for parameter "op"')
         }
         if (typeof fn !== 'string') {
-            throw new TypeError('string expected for parameter "fn"')
+            throw new TypeError('OperatorNode.constructor | string expected for parameter "fn"')
         }
         if (!Array.isArray(args) || !args.every(isNode)) {
             throw new TypeError(
-                'Array containing Nodes expected for parameter "args"')
+                'OperatorNode.constructor | Array containing Nodes expected for parameter "args"')
         }
 
         this.implicit = (implicit === true)
@@ -48,54 +48,34 @@ export class OperatorNode extends ExpressionNode {
     }
 
 
-    /**
-     * Compile a node into a JavaScript function.
-     * This basically pre-calculates as much as possible and only leaves open
-     * calculations which depend on a dynamic scope with variables.
-     * @param {Object} math     Math.js namespace with functions and constants.
-     * @param {Object} argNames An object with argument names as key and `true`
-     *                          as value. Used in the SymbolNode to optimize
-     *                          for arguments from user assigned functions
-     *                          (see FunctionAssignmentNode) or special symbols
-     *                          like `end` (see IndexNode).
-     * @return {function} Returns a function which can be called like:
-     *                        evalNode(scope: Object, args: Object, context: *)
-     */
-    _compile(math, argNames) {
+    _compile(mathFunctions: Object): (scope: IScope) => any {
+
         // validate fn
-        if (typeof this.fn !== 'string' || !isSafeMethod(math, this.fn)) {
-            console.log("asdasdasdasdasdasdasdasdasd")
-            if (!math[this.fn]) {
-                throw new Error(
-                    'Function ' + this.fn + ' missing in provided namespace "math"')
+        if (!isSafeMethod(mathFunctions, this.fn)) {
+            if (!mathFunctions[this.fn]) {
+                throw new Error('OperatorNode._compile | Function ' + this.fn + ' missing in provided namespace "math"')
             } else {
-                throw new Error('No access to function "' + this.fn + '"')
+                throw new Error('OperatorNode._compile | No access to function "' + this.fn + '"')
             }
         }
 
-        const fn = getSafePropertyFromComplexObject(math, this.fn)
-        const evalArgs = map(this.args, function (arg) {
-            return arg._compile(math, argNames)
-        })
+        const fn = getSafePropertyFromComplexObject(mathFunctions, this.fn)
+        const evalArgs = this.args.map(arg => arg._compile(mathFunctions))
 
         if (evalArgs.length === 1) {
             const evalArg0 = evalArgs[0]
-            return function evalOperatorNode(scope, args, context) {
-                return fn(evalArg0(scope, args, context))
+            return (scope: IScope) => {
+                return fn(evalArg0(scope))
             }
         } else if (evalArgs.length === 2) {
             const evalArg0 = evalArgs[0]
             const evalArg1 = evalArgs[1]
-            return function evalOperatorNode(scope, args, context) {
-                return fn(
-                    evalArg0(scope, args, context),
-                    evalArg1(scope, args, context))
+            return (scope: IScope) => {
+                return fn(evalArg0(scope), evalArg1(scope))
             }
         } else {
-            return function evalOperatorNode(scope, args, context) {
-                return fn.apply(null, map(evalArgs, function (evalArg) {
-                    return evalArg(scope, args, context)
-                }))
+            return (scope: IScope) => {
+                return fn.apply(null, evalArgs.map(evalArg => evalArg(scope)))
             }
         }
     }

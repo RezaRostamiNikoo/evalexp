@@ -1,4 +1,4 @@
-import { map } from "../utils/array";
+import { IScope } from "../interfaces";
 import { isNode } from "../utils/is";
 import { ExpressionNode } from "./ExpressionNode";
 
@@ -30,35 +30,12 @@ export class ArrayNode extends ExpressionNode {
      * Compile a node into a JavaScript function.
      * This basically pre-calculates as much as possible and only leaves open
      * calculations which depend on a dynamic scope with variables.
-     * @param {Object} math     Math.js namespace with functions and constants.
-     * @param {Object} argNames An object with argument names as key and `true`
-     *                          as value. Used in the SymbolNode to optimize
-     *                          for arguments from user assigned functions
-     *                          (see FunctionAssignmentNode) or special symbols
-     *                          like `end` (see IndexNode).
-     * @return {function} Returns a function which can be called like:
-     *                        evalNode(scope: Object, args: Object, context: *)
+     * @param {Object} mathFunctions namespace with functions and constants.
+     * @return {(scope: IScope): any} Returns a function which can be called like: evalNode(scope: Object)
      */
-    _compile(math, argNames) {
-        const evalItems = map(this.items, function (item) {
-            return item._compile(math, argNames)
-        })
-
-        const asMatrix = (math.config.matrix !== 'Array')
-        if (asMatrix) {
-            const matrix = math.matrix
-            return function evalArrayNode(scope, args, context) {
-                return matrix(map(evalItems, function (evalItem) {
-                    return evalItem(scope, args, context)
-                }))
-            }
-        } else {
-            return function evalArrayNode(scope, args, context) {
-                return map(evalItems, function (evalItem) {
-                    return evalItem(scope, args, context)
-                })
-            }
-        }
+    _compile(mathFunctions: Object): (scope: IScope) => any {
+        const evalItems = this.items.map(item => item._compile(mathFunctions))
+        return (scope: IScope) => evalItems.map(evalItem => evalItem(scope))
     }
 
     /**
