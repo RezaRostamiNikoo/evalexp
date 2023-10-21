@@ -1,7 +1,6 @@
 import { isAccessorNode, isSymbolNode } from "../../utils/is"
 import { createSyntaxError } from "../../errors";
 import { AccessorNode } from "../../node/AccessorNode";
-import { ConstantNode } from "../../node/ConstantNode";
 import { FunctionNode } from "../../node/FunctionNode";
 import { IndexNode } from "../../node/IndexNode";
 import { ExpressionNode } from "../../node/ExpressionNode"
@@ -89,7 +88,7 @@ export function parseAccessors(state: State, node: ExpressionNode, types?: Array
             if (!state.isType("SYMBOL")) {
                 throw createSyntaxError(state, 'Property name expected after dot')
             }
-            params.push(new ConstantNode(state.token.value))
+            params.push(new SymbolNode(state.token.value))
             state.goAhead();
 
             const dotNotation = true

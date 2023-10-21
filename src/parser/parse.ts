@@ -16,7 +16,7 @@ import { ExpressionNode } from "../node/ExpressionNode";
  * @return {ExpressionNode} node
  * @private
  */
-export function parse(expression: string, scope: Object = {}): ExpressionNode {
+export function parse(expression: string): ExpressionNode {
     const state = new State(expression);
 
     if (!state.token.value) throw new Error("there is no token");

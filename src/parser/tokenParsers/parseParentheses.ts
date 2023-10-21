@@ -1,6 +1,6 @@
 import { createSyntaxError } from "../../errors";
 import { ExpressionNode } from "../../node/ExpressionNode"
-import { ParenthesisNode } from "../../node/ParenthesisNode";
+import { ParenthesesNode } from "../../node/ParenthesesNode";
 import { State } from "../State"
 import { parseAccessors } from "./parseAccessors";
 import { parseEnd } from "./parseEnd"
@@ -28,7 +28,7 @@ export function parseParentheses(state: State): ExpressionNode {
         // state.prevLevel();
         state.goAhead();
 
-        node = new ParenthesisNode(node)
+        node = new ParenthesesNode(node)
         node = parseAccessors(state, node)
         return node;
     }

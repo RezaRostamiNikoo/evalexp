@@ -40,8 +40,8 @@ export class State {
      * It shifts the current token from the queue and next toke is ready to be proccessed on
      * @returns {State} return the main state
      */
-    goAhead(): State { this._deletedTokens.push(this.getTokens().dequeue()); return this; }
-    rewind(): State { this.getTokens().enqueueAtFirst(this._deletedTokens.pop()); return this }
+    goAhead(): State { this._deletedTokens.push(this.getTokens().dequeue()); return this }
+    rewind(): State { this.getTokens().cutTheLine(this._deletedTokens.pop()); return this }
 
     /**
      * It checks if current token is equal to the given chars or not.

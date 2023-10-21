@@ -1,4 +1,3 @@
-import { isReliableNodeForUnary } from "../../utils/is";
 import { hasOwnProperty } from "../../utils/object";
 import { ExpressionNode } from "../../node/ExpressionNode"
 import { OperatorNode } from "../../node/OperatorNode";
