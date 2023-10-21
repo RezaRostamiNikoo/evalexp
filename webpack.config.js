@@ -1,7 +1,8 @@
 
 const path = require("path");
+const packagejson = require("./package.json")
 
-const libraryName = "mathcal"
+const libraryName = packagejson.name
 /** @type {import('webpack').Configuration} */
 module.exports = {
     mode: "none",
