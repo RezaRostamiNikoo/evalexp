@@ -48,14 +48,14 @@ export class State {
      * @param {string} chars the character to be compared with current token
      * @returns {boolean} return True if it is equal
      */
-    isToken(chars: string): boolean { return this.token.value === chars; }
+    isToken(chars: string): boolean { return this.token?.value === chars; }
 
     /**
      * It checks if current token type is equal to the given type or not.
      * @param {TokenType} type the character to be compared with current token type
      * @returns {boolean} return True if it is equal
      */
-    isType(type: TokenType): boolean { return this.token.type === type; }
+    isType(type: TokenType): boolean { return this.token?.type === type; }
 
 
     getErrorOnHead(): string {

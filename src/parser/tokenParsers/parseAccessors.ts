@@ -26,7 +26,7 @@ import { SymbolNode } from "../../node/SymbolNode";
 export function parseAccessors(state: State, node: ExpressionNode, types?: Array<String>) {
     let params: Array<ExpressionNode>;
 
-    while (['(', '[', '.'].includes(state.token.value) &&
+    while (['(', '[', '.'].includes(state.token?.value) &&
         (!types || types.indexOf(state.token.value) !== -1)) { // eslint-disable-line no-unmodified-loop-condition
         params = []
 

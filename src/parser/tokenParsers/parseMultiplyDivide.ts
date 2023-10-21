@@ -23,7 +23,7 @@ export function parseMultiplyDivide(state: State): ExpressionNode {
     }
 
     while (true) {
-        if (hasOwnProperty(operators, state.token.value)) {
+        if (hasOwnProperty(operators, state.token?.value)) {
             // explicit operators
             name = state.token.value
             fn = operators[name]

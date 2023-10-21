@@ -20,7 +20,7 @@ export function parseAddSubtract(state: State): ExpressionNode {
         '-': 'subtract'
     }
 
-    while (hasOwnProperty(operators, state.token.value)) {
+    while (hasOwnProperty(operators, state.token?.value)) {
         const token = state.token;
         fn = operators[token.value]
 

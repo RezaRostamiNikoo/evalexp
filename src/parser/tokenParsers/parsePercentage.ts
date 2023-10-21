@@ -18,7 +18,7 @@ export function parsePercentage(state: State): ExpressionNode {
     const operators = {
         '%': 'mod',
     }
-    while (hasOwnProperty(operators, state.token.value)) {
+    while (hasOwnProperty(operators, state.token?.value)) {
         name = state.token.value
         state.goAhead();
 
