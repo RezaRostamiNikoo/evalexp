@@ -10,7 +10,7 @@ import { hasOwnProperty } from './object'
  */
 function getSafeProperty(object: Object, prop: string) {
   // only allow getting safe properties of a plain object
-  if (isPlainObject(object) && isSafeProperty(object, prop)) {
+  if (/*isPlainObject(object) && */ isSafeProperty(object, prop)) {
     return (object as any)[prop]
   }
 
