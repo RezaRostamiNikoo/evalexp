@@ -1,6 +1,7 @@
 
 const path = require("path");
 
+const libraryName = "evalmath"
 /** @type {import('webpack').Configuration} */
 module.exports = {
     mode: "none",
@@ -14,6 +15,22 @@ module.exports = {
             },
         ],
     },
+    plugins: [
+        function () {
+            this.hooks.done.tap({
+                name: "dts-bundler"
+            }, stats => {
+                var dts = require('dts-bundle');
+                dts.bundle({
+                    name: libraryName,
+                    main: './dist/types/index.d.ts',
+                    out: '../index.d.ts',
+                    removeSource: true,
+                    outputAsModuleFolder: true // to use npm in-package typings
+                });
+            })
+        }
+    ],
     devtool: 'source-map',
     resolve: {
         extensions: [".ts", ".js"],
@@ -23,9 +40,9 @@ module.exports = {
         filename: 'index.js',
         library: {
             name: {
-                root: 'evalexp',
-                amd: 'evalexp',
-                commonjs: 'evalexp',
+                root: libraryName,
+                amd: libraryName,
+                commonjs: libraryName,
             },
             type: 'umd',
         },
