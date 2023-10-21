@@ -50,6 +50,8 @@ export class Tokenizer {
     }
 
     get_bi_oct_hex_token(): TokenType {
+        
+        if (this.textAnalyzer.remainedCharByHead() < 2) return undefined
         // check for binary, octal, or hex
         const c2 = this.textAnalyzer.chunkFromHead(2)
         if (c2 === '0b' || c2 === '0o' || c2 === '0x') {
