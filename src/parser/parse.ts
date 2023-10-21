@@ -17,6 +17,7 @@ import { ExpressionNode } from "../node/ExpressionNode";
  * @private
  */
 export function parse(expression: string): ExpressionNode {
+    if (typeof expression !== "string") return expression
     const state = new State(expression);
 
     if (!state.token.value) throw new Error("there is no token");
