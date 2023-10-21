@@ -64,17 +64,17 @@ export function createMap(mapOrObject: Map<string, unknown> | { [key: string]: u
  * @param {Map} map
  * @returns { [key: string]: unknown }
  */
-export function toObject(map: ObjectWrappingMap | Map<string, any>) {
-  if (map instanceof ObjectWrappingMap) {
-    return map.wrappedObject
-  }
-  const object = {}
-  for (const key of map.keys()) {
-    const value = map.get(key)
-    setSafeProperty(object, key, value)
-  }
-  return object
-}
+// export function toObject(map: ObjectWrappingMap | Map<string, any>) {
+//   if (map instanceof ObjectWrappingMap) {
+//     return map.wrappedObject
+//   }
+//   const object = {}
+//   for (const key of (map.keys()) {
+//     const value = map.get(key)
+//     setSafeProperty(object, key, value)
+//   }
+//   return object
+// }
 
 /**
  * Returns `true` if the passed object appears to be a Map (i.e. duck typing).
