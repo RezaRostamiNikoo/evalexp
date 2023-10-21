@@ -1,7 +1,7 @@
 
 const path = require("path");
 
-const libraryName = "evalmath"
+const libraryName = "mathcal"
 /** @type {import('webpack').Configuration} */
 module.exports = {
     mode: "none",
