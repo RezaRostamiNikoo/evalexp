@@ -44,4 +44,14 @@ describe("Tokenizer Class Test", () => {
         expect(t.getNextToken().value).toEqual(".GE.");
         expect(t.getNextToken().value).toEqual(".LE.");
     });
+
+    test('string with space', () => {
+        const expression = "my name is hamid"
+
+        const t = new Tokenizer(expression);
+        expect(t.getNextToken().value).toEqual("my");
+
+
+
+    })
 })
