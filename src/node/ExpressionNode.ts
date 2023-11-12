@@ -281,9 +281,13 @@ export abstract class ExpressionNode {
         return this;
     }
 
-
-    protected checkValueToParse(scope: IScope, value: string): any {
-        if (typeof value === "string") return parse(value).evaluate(scope);
-        return value;
+    protected calculateValue(scope: IScope, name: string): any {
+        const item = scope.get(name)
+        if (!item) return undefined
+        if (item.hasBeenCalculated()) return item.getCalculatedValue()
+        if (typeof item.getRawValue() === "string")
+            item.setCalculatedValue(parse(item.getRawValue()).evaluate(scope))
+        else item.setCalculatedValue(item.getRawValue())
+        return item.getCalculatedValue()
     }
 }

@@ -38,10 +38,16 @@ export class SymbolNode extends ExpressionNode {
         const _this = this
         const name = this.name
 
-        if (name in mathFunctions) return (scope: IScope) =>
-            scope.has(name) ? _this.checkValueToParse(scope, scope.get(name)) : getSafePropertyFromComplexObject(mathFunctions, name)
-        else return (scope: IScope) =>
-            scope.has(name) ? _this.checkValueToParse(scope, scope.get(name)) : name;
+        if (name in mathFunctions) return (scope: IScope) => {
+            return scope.has(name)
+                ? this.calculateValue(scope, name)
+                : getSafePropertyFromComplexObject(mathFunctions, name)
+        }
+        else return (scope: IScope) => {
+            return scope.has(name)
+                ? this.calculateValue(scope, name)
+                : name;
+        }
     }
 
 
