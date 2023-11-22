@@ -282,9 +282,9 @@ export abstract class ExpressionNode {
     }
 
     protected calculateValue(scope: IScope, name: string): any {
-        const item = scope.get(name)
+        const item = scope.getItem(name)
         if (!item) return undefined
-        if (item.hasBeenCalculated()) return item.getCalculatedValue()
+        if (item.isCalculated()) return item.getCalculatedValue()
         if (typeof item.getRawValue() === "string")
             item.setCalculatedValue(parse(item.getRawValue()).evaluate(scope))
         else item.setCalculatedValue(item.getRawValue())
