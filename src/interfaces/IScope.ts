@@ -43,6 +43,13 @@ export interface IScope {
 
     forEach(callback: (value: IScopeItem, key: string) => void): void
     keys(): IterableIterator<string>
+
+    calculateOwnItem(key: string): any
+    calculateOtherItem(key: string): any
+    calculateItem(key: string): any
+    calculateOwn(): this
+    calculateOther(): this
+    calculate(): this
 }
 
 
