@@ -50,6 +50,7 @@ export interface IScope {
     calculateOwn(): this
     calculateOther(): this
     calculate(): this
+    calculateExpression(expression: string): any
 }
 
 
