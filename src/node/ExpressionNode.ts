@@ -281,13 +281,15 @@ export abstract class ExpressionNode {
         return this;
     }
 
-    protected calculateValue(scope: IScope, name: string): any {
-        const item = scope.getItem(name)
-        if (!item) return undefined
-        if (item.isCalculated()) return item.getCalculatedValue()
-        if (typeof item.getRawValue() === "string")
-            item.setCalculatedValue(parse(item.getRawValue()).evaluate(scope))
-        else item.setCalculatedValue(item.getRawValue())
-        return item.getCalculatedValue()
-    }
+    // protected calculateValue(scope: IScope, key: string): any {
+    //     return scope.getValue(key)
+    //     // const item = scope.getItem(key)
+    //     // if (!item) return undefined
+    //     // if (item.isCalculated()) return item.getCalculatedValue()
+    //     // if (!scope.shouldCalculateBackward()) return item.getRawValue()
+    //     // if (typeof item.getRawValue() === "string")
+    //     //     item.setCalculatedValue(parse(item.getRawValue()).evaluate(scope))
+    //     // else item.setCalculatedValue(item.getRawValue())
+    //     // return item.getCalculatedValue()
+    // }
 }

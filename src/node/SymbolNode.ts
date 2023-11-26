@@ -40,12 +40,12 @@ export class SymbolNode extends ExpressionNode {
 
         if (name in mathFunctions) return (scope: IScope) => {
             return scope.has(name)
-                ? this.calculateValue(scope, name)
+                ? scope.getValue(name)
                 : getSafePropertyFromComplexObject(mathFunctions, name)
         }
         else return (scope: IScope) => {
             return scope.has(name)
-                ? this.calculateValue(scope, name)
+                ? scope.getValue(name)
                 : name;
         }
     }
