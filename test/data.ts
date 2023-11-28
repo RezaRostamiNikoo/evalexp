@@ -17,10 +17,6 @@ data.set("oo", {
 data.set("aa", [400, 500, 600])
 
 export class MScope implements IScope {
-    get(key: string) { return data.get(key) }
-    getWithArgs(key: string, ...args: any[]) {
-        throw new Error("Method not implemented.");
-    }
-    set(key: string, value: any) { data.set(key, value) }
+    getValue(key: string) { return data.get(key) }
     has(key: any): boolean { return data.has(key) }
 }
