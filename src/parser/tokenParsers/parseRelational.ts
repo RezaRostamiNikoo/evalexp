@@ -22,6 +22,8 @@ export function parseRelational(state: State): ExpressionNode {
         '.GT.': 'larger',
         '.LE.': 'smallerEq',
         '.GE.': 'largerEq',
+        '.OR.': 'or',
+        '.AND.': 'and',
 
         '==': 'equal',
         '!=': 'unequal',
@@ -29,6 +31,8 @@ export function parseRelational(state: State): ExpressionNode {
         '>': 'larger',
         '<=': 'smallerEq',
         '>=': 'largerEq',
+        '||': 'or',
+        '&&': 'and',
     }
 
     while (hasOwnProperty(operators, state.token?.value)) { // eslint-disable-line no-unmodified-loop-condition

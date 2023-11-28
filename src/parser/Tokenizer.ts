@@ -37,7 +37,7 @@ export class Tokenizer {
     }
 
     private getDelimiterToken(): TokenType {
-        const maxLengthOfADelimiter = 4;
+        const maxLengthOfADelimiter = 5;
         for (let step = maxLengthOfADelimiter; step > 0; step--) {
             if (this.textAnalyzer.remainedCharByHead() >= step) {
                 if (DELIMITERS[this.textAnalyzer.chunkFromHead(step)]) {

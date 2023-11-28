@@ -1,5 +1,4 @@
 import { AccessorNode, ArrayNode, FunctionNode, IndexNode, OperatorNode, ParenthesesNode, RelationalNode, SymbolNode, parse } from "../src";
-import { IScope } from "../src";
 import { ConstantNode } from "../src"
 import { isPlainObject } from "../src/utils/customs";
 import { MScope } from "./data";
@@ -104,6 +103,16 @@ describe("Testing the ExpressionNodes", () => {
                 new ConstantNode(5),
                 new ConstantNode(6),
                 new ConstantNode(10),
+            ]
+
+        )
+            .evaluate(scope)).toEqual(true)
+
+        expect(new RelationalNode(
+            ["and"],
+            [
+                new ConstantNode(5),
+                new ConstantNode(6)
             ]
 
         )

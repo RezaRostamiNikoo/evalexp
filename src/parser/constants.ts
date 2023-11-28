@@ -19,12 +19,16 @@ export const DELIMITERS: object = {
     '>': true,
     '<=': true,
     '>=': true,
+    '||': true,
+    '&&': true,
     '.EQ.': true,
     '.NE.': true,
     '.GT.': true,
     '.GE.': true,
     '.LT.': true,
     '.LE.': true,
+    '.OR.': true,
+    '.AND.': true,
 }
 
 
