@@ -23,6 +23,6 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "predefined-ds": "^1.6.1"
+    "predefined-ds": "^1.8.2"
   }
 }
