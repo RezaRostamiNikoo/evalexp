@@ -1,7 +1,6 @@
 import { IScope } from "../interfaces";
-import { getSafeMethod, getSafeProperty, getSafePropertyFromComplexObject } from "../utils/customs";
-import { isAccessorNode, isFunctionAssignmentNode, isIndexNode, isNode, isSymbolNode } from "../utils/is";
-import { createSubScope } from "../utils/scope";
+import { getSafePropertyFromComplexObject } from "../utils/customs";
+import { isFunctionAssignmentNode, isIndexNode, isNode, isSymbolNode } from "../utils/is";
 import { ExpressionNode } from "./ExpressionNode";
 import { SymbolNode } from "./SymbolNode";
 
