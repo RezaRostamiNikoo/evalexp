@@ -48,3 +48,9 @@ export const cubic = (a: number, b: number, c: number, d: number): Array<number>
 
     return roots;
 }
+
+export const length = (arg: Array<Number>): number => {
+    if (!Array.isArray(arg))
+        throw new Error(`Parsingamth.length the given argument should be an array\n${arg}`)
+    return arg.length
+}
